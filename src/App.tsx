@@ -63,7 +63,8 @@ function App() {
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">
             Weekly Schedule
           </h1>
-          <p className="text-slate-600 max-w-md mx-auto">Select a day to view your classes and stay organized throughout your week</p>
+          <p className="text-slate-600 max-w-md mx-auto">Trimester-1</p>
+          <p className="text-slate-600 max-w-md mx-auto">made by nurik for nurik</p>
         </div>
 
         <Tabs defaultValue="Monday" value={selectedDay} onValueChange={setSelectedDay} className="w-full">
