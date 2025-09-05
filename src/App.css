@@ -10,6 +10,7 @@
   --shadow-color: rgba(0, 0, 0, 0.05);
   --success-color: #28a745;
   --warning-color: #ffc107;
+  --lecture-color: #dc3545;
 }
 
 body {
@@ -50,11 +51,11 @@ body {
   margin-bottom: 25px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .day-tabs::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none;
 }
 
 .day-tab-button {
@@ -149,7 +150,7 @@ body {
 }
 
 .type.lecture {
-  background-color: #dc3545; /* A more subtle red for lectures */
+  background-color: var(--lecture-color);
 }
 
 .location, .lector {
@@ -169,7 +170,6 @@ body {
 
 /* --- Responsive Design for PC and Phone --- */
 
-/* Mobile-first approach: Styles for phones by default */
 @media (max-width: 768px) {
   .schedule-container {
     padding: 20px;
@@ -194,7 +194,6 @@ body {
   }
 }
 
-/* PC/Tablet specific styles */
 @media (min-width: 769px) {
   .day-tabs {
     justify-content: center;

@@ -1,8 +1,22 @@
 import { useState } from 'react';
 import './App.css';
 
+// Define the type for a single schedule item
+type ScheduleItem = {
+  time: string;
+  discipline: string;
+  classroom: string;
+  type: 'lecture' | 'practice';
+  lector: string;
+};
+
+// Define the type for the entire schedule data object
+type ScheduleData = {
+  [key: string]: ScheduleItem[];
+};
+
 function App() {
-  const scheduleData = {
+  const scheduleData: ScheduleData = {
     'Monday': [
       { time: '11:00-11:50', discipline: 'Operating Systems', classroom: 'online', type: 'practice', lector: 'Kulbayeva Laura' },
       { time: '14:00-14:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.334L', type: 'lecture', lector: 'Min Soo Hah' },
@@ -36,10 +50,15 @@ function App() {
   };
 
   const daysOfWeek = Object.keys(scheduleData);
-  const [selectedDay, setSelectedDay] = useState(daysOfWeek[0]);
+  const [selectedDay, setSelectedDay] = useState<keyof ScheduleData>('Monday');
 
   const renderSchedule = () => {
-    return scheduleData[selectedDay].map((item, index) => (
+    const currentDaySchedule = scheduleData[selectedDay];
+    if (!currentDaySchedule) {
+      return <div className="no-schedule">No schedule for this day.</div>;
+    }
+
+    return currentDaySchedule.map((item, index) => (
       <li key={index} className="schedule-item">
         <div className="schedule-time">
           <i className="fas fa-clock"></i> {item.time}
@@ -66,7 +85,7 @@ function App() {
           <button
             key={day}
             className={`day-tab-button ${selectedDay === day ? 'active' : ''}`}
-            onClick={() => setSelectedDay(day)}
+            onClick={() => setSelectedDay(day as keyof ScheduleData)}
           >
             {day}
           </button>
