@@ -20,7 +20,7 @@ type ScheduleItem = {
 
 type ScheduleData = {
   [key: string]: ScheduleItem[];
-} | null;
+};
 
 function App() {
   const navigate = useNavigate();
@@ -31,7 +31,7 @@ function App() {
       navigate(path);
     }
   };
-  const [scheduleData, setScheduleData] = useState<ScheduleData>(null);
+  const [scheduleData, setScheduleData] = useState<ScheduleData>({});
   const [selectedDay, setSelectedDay] = useState<string>('Monday');
   const [group, setGroup] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
@@ -68,9 +68,7 @@ function App() {
   // Get all unique subjects in current schedule
   const allSubjects = Array.from(
     new Set(
-      scheduleData
-        ? Object.values(scheduleData).flat().map(item => item.discipline)
-        : []
+      Object.values(scheduleData).flat().map(item => item.discipline)
     )
   );
 
@@ -259,7 +257,7 @@ function App() {
           {daysOfWeek.map(day => (
             <TabsContent key={day} value={day} className="mt-6">
               <div className="grid gap-4">
-                {scheduleData && scheduleData[day]?.filter(item => !hiddenSubjects.includes(item.discipline)).length > 0 ? (
+                {scheduleData[day]?.filter(item => !hiddenSubjects.includes(item.discipline)).length > 0 ? (
                   scheduleData[day]
                     .filter(item => !hiddenSubjects.includes(item.discipline))
                     .map((item, index) => (

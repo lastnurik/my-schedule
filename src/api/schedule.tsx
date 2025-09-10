@@ -33,14 +33,20 @@ class ScheduleService {
 				const dayName: string = dayObj.day;
 				if (Array.isArray(dayObj.items)) {
 					mapped[dayName] = dayObj.items
-						.map((item: any): ScheduleItem => ({
-							time: item.classtime_time,
-							discipline: item.subject,
-							classroom: item.room,
-							type: item.lesson_type === 'lecture' ? 'lecture' : 'practice',
-							lector: item.tutor,
-							teamsMeetingUrl: item.teamsMeetingUrl || null,
-						}))
+						.map((item: any): ScheduleItem => {
+							let lessonType = item.lesson_type;
+							if (lessonType !== 'lecture' && lessonType !== 'practice') {
+								lessonType = 'practice'; // fallback for unknown types
+							}
+							return {
+								time: item.classtime_time,
+								discipline: item.subject,
+								classroom: item.room,
+								type: lessonType,
+								lector: item.tutor,
+								teamsMeetingUrl: item.teamsMeetingUrl || null,
+							};
+						})
 						.sort((a: ScheduleItem, b: ScheduleItem) => a.time.localeCompare(b.time));
 				} else {
 					mapped[dayName] = [];
