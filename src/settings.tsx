@@ -1,14 +1,15 @@
-import { Settings, Calendar, MapPin, Newspaper } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import { useState } from "react";
 
 function SettingsPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const handleNav = (path: string) => {
-    if (location.pathname !== path) {
-      navigate(path);
-    }
+  const [calendarUrl, setCalendarUrl] = useState(localStorage.getItem("calendarUrl") || "");
+
+  const handleFetch = () => {
+    localStorage.setItem("calendarUrl", calendarUrl);
+    // You can add fetch logic here if needed
+    alert("Calendar URL saved!");
   };
 
   return (
@@ -44,6 +45,26 @@ function SettingsPage() {
           </div>
         </div>
 
+        {/* Calendar URL Section */}
+        <div className="bg-white/90 rounded-xl border border-slate-200 shadow-lg px-6 py-6 flex flex-col gap-4">
+          <h3 className="text-lg font-semibold text-slate-700 mb-2">Import Assignments Calendar</h3>
+          <p className="text-slate-500 text-sm">Paste your Moodle calendar export URL below. You can get it from your LMS calendar export page.</p>
+          <input
+            type="text"
+            className="border rounded px-3 py-2 w-full max-w-md"
+            placeholder="Paste calendar URL here..."
+            value={calendarUrl}
+            onChange={e => setCalendarUrl(e.target.value)}
+          />
+          <div className="flex gap-2 mt-2">
+            <Button onClick={handleFetch}>Fetch</Button>
+          </div>
+          <div className="mt-1 text-s text-blue-500"><a href="https://lms.astanait.edu.kz/calendar/export.php?">link</a></div>
+          <div className="mt-1 text-xs text-slate-400">Instruction: Go to your LMS calendar, find export, copy the link and paste here.</div>
+          <div className="flex gap-2 mt-2">
+            <img src="/guide.jpg" alt="Instruction 1" className="w-32 border rounded" />
+          </div>
+        </div>
 
         {/* Theme Section (placeholder) */}
         <div className="bg-white/90 rounded-xl border border-slate-200 shadow-lg px-6 py-6 flex flex-col gap-4">
@@ -52,42 +73,7 @@ function SettingsPage() {
         </div>
       </div>
       {/* Fixed Footer Navbar */}
-      <nav className="fixed bottom-0 left-0 w-full h-15 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
-        <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-3">
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/' ? 'text-indigo-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/')}
-          >
-            <Calendar className="h-6 w-6" />
-            <span className="text-xs">Main</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/map' ? 'text-purple-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/map')}
-          >
-            <MapPin className="h-6 w-6" />
-            <span className="text-xs">Map</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/news' ? 'text-pink-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/news')}
-          >
-            <Newspaper className="h-6 w-6" />
-            <span className="text-xs">News</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/settings' ? 'text-indigo-500' : 'text-slate-500'}`}
-            onClick={() => handleNav('/settings')}
-          >
-            <Settings className="h-6 w-6" />
-            <span className="text-xs">Settings</span>
-          </Button>
-        </div>
-      </nav>
+      <Navbar />
     </div>
   );
 }
