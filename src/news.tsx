@@ -1,4 +1,4 @@
-import React from "react";
+// ...existing code...
 import { Newspaper, Calendar, MapPin, Settings as SettingsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";

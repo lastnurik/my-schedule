@@ -1,17 +1,4 @@
-import React from "react";
-// Import schedule and filters from localStorage
-function getHiddenSubjects() {
-  const lastGroup = localStorage.getItem('lastGroup');
-  if (!lastGroup) return [];
-  const hidden = localStorage.getItem(`hiddenSubjects_${lastGroup}`);
-  return hidden ? JSON.parse(hidden) : [];
-}
-function getScheduleForGroup() {
-  const lastGroup = localStorage.getItem('lastGroup');
-  if (!lastGroup) return {};
-  const data = localStorage.getItem(`schedule_${lastGroup}`);
-  return data ? JSON.parse(data) : {};
-}
+// ...existing code...
 import { Settings, Calendar, MapPin, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
