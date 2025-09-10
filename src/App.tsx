@@ -1,8 +1,13 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User } from 'lucide-react';
+import { Calendar, Clock, MapPin, User, Newspaper, Settings as SettingsIcon } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import ScheduleService from "@/api/schedule";
 
 type ScheduleItem = {
   time: string;
@@ -10,6 +15,7 @@ type ScheduleItem = {
   classroom: string;
   type: 'lecture' | 'practice';
   lector: string;
+  teamsMeetingUrl?: string | null;
 };
 
 type ScheduleData = {
@@ -17,44 +23,136 @@ type ScheduleData = {
 };
 
 function App() {
-  const scheduleData: ScheduleData = {
-    'Monday': [
-      { time: '11:00-11:50', discipline: 'Operating Systems', classroom: 'online', type: 'practice', lector: 'Kulbayeva Laura' },
-      { time: '14:00-14:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.334L', type: 'lecture', lector: 'Min Soo Hah' },
-      { time: '15:00-15:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.334L', type: 'lecture', lector: 'Min Soo Hah' },
-      { time: '16:00-16:50', discipline: 'WEB Technologies 1 (Front End)', classroom: 'C1 1.358K', type: 'practice', lector: 'Aruzhan Ali' },
-      { time: '17:00-17:50', discipline: 'WEB Technologies 1 (Front End)', classroom: 'C1 1.358K', type: 'practice', lector: 'Aruzhan Ali' },
-    ],
-    'Tuesday': [
-      { time: '08:00-08:50', discipline: 'WEB Technologies 1 (Front End)', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-      { time: '09:00-09:50', discipline: 'WEB Technologies 1 (Front End)', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-    ],
-    'Wednesday': [
-      { time: '20:00-20:50', discipline: 'Operating Systems', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-      { time: '21:00-21:50', discipline: 'Operating Systems', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-    ],
-    'Thursday': [
-      { time: '15:00-15:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.355P', type: 'practice', lector: 'Asabai Al-Tarazi' },
-      { time: '16:00-16:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.355P', type: 'practice', lector: 'Asabai Al-Tarazi' },
-      { time: '17:00-17:50', discipline: 'Introduction to Finance', classroom: 'C1 3.318', type: 'practice', lector: 'Aigaiym Jaras' },
-      { time: '18:00-18:50', discipline: 'Introduction to Finance', classroom: 'C1 3.318', type: 'practice', lector: 'Aigaiym Jaras' },
-    ],
-    'Friday': [
-      { time: '10:00-10:50', discipline: 'Operating Systems', classroom: 'online', type: 'practice', lector: 'Kulbayeva Laura' },
-      { time: '11:00-11:50', discipline: 'Operating Systems', classroom: 'online', type: 'practice', lector: 'Kulbayeva Laura' },
-      { time: '15:00-15:50', discipline: 'Introduction to Finance', classroom: 'C1 3.318', type: 'practice', lector: 'Aigaiym Jaras' },
-      { time: '16:00-16:50', discipline: 'Analytic methods in Computer Science', classroom: 'C1 1.355P', type: 'practice', lector: 'Asabai Al-Tarazi' },
-      { time: '17:00-17:50', discipline: 'WEB Technologies 1 (Front End)', classroom: 'C1 1.358K', type: 'practice', lector: 'Aruzhan Ali' },
-      { time: '20:00-20:50', discipline: 'Introduction to Finance', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-      { time: '21:00-21:50', discipline: 'Introduction to Finance', classroom: 'online', type: 'lecture', lector: 'https://learn.astanait.edu.kz/' },
-    ],
+  const navigate = useNavigate();
+  const location = useLocation();
+  // Footer navigation handler
+  const handleNav = (path: string) => {
+    if (location.pathname !== path) {
+      navigate(path);
+    }
+  };
+  const [scheduleData, setScheduleData] = useState<ScheduleData>({});
+  const [selectedDay, setSelectedDay] = useState<string>('Monday');
+  const [group, setGroup] = useState<string>('');
+  const [showForm, setShowForm] = useState<boolean>(false);
+  const [showFilter, setShowFilter] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hiddenSubjects, setHiddenSubjects] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Always use the latest saved schedule on app open
+    const lastGroup = localStorage.getItem('lastGroup');
+    if (lastGroup) {
+      setGroup(lastGroup);
+      fetchLocalSchedule(lastGroup);
+      // Load hidden subjects for group
+      const hidden = localStorage.getItem(`hiddenSubjects_${lastGroup}`);
+      setHiddenSubjects(hidden ? JSON.parse(hidden) : []);
+    }
+  }, []);
+
+  const fetchLocalSchedule = (groupName: string) => {
+    const service = new ScheduleService();
+    const local = service.getLocalSchedule(groupName);
+    if (local) {
+      setScheduleData(local);
+      // Load hidden subjects for group
+      const hidden = localStorage.getItem(`hiddenSubjects_${groupName}`);
+      setHiddenSubjects(hidden ? JSON.parse(hidden) : []);
+    } else {
+      setScheduleData({});
+      setHiddenSubjects([]);
+    }
+  };
+  // Get all unique subjects in current schedule
+  const allSubjects = Array.from(
+    new Set(
+      Object.values(scheduleData)
+        .flat()
+        .map(item => item.discipline)
+    )
+  );
+
+  // Handle filter change
+  const handleFilterChange = (subject: string) => {
+    let updated: string[];
+    if (hiddenSubjects.includes(subject)) {
+      updated = hiddenSubjects.filter(s => s !== subject);
+    } else {
+      updated = [...hiddenSubjects, subject];
+    }
+    setHiddenSubjects(updated);
+    localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify(updated));
   };
 
-  const daysOfWeek = Object.keys(scheduleData);
-  const [selectedDay, setSelectedDay] = useState<string>('Monday');
+  const handleFetchSchedule = async () => {
+    if (!navigator.onLine) {
+      // Offline: use local only
+      const service = new ScheduleService();
+      const local = service.getLocalSchedule(group);
+      setScheduleData(local || {});
+      setError("You are offline. Showing stored schedule.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const service = new ScheduleService();
+      // Fetch from API and update local storage only when button is pressed
+      const data = await service.fetchSchedule(group);
+      setScheduleData(data);
+      service.storeScheduleLocally(group, data);
+      localStorage.setItem('lastGroup', group);
+      setShowForm(false);
+    } catch (e: any) {
+      setError(e.message || 'Failed to fetch schedule');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8 px-4">
+  <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24 pt-8 px-4">
+      {/* Fixed Footer Navbar */}
+      <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
+        <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-2">
+          <Button
+            variant="ghost"
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/' ? 'text-indigo-600' : 'text-slate-500'}`}
+            onClick={() => handleNav('/')}
+          >
+            <Calendar className="h-6 w-6" />
+            <span className="text-xs">Main</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/map' ? 'text-purple-600' : 'text-slate-500'}`}
+            onClick={() => handleNav('/map')}
+          >
+            <MapPin className="h-6 w-6" />
+            <span className="text-xs">Map</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/news' ? 'text-pink-600' : 'text-slate-500'}`}
+            onClick={() => handleNav('/news')}
+          >
+            <Newspaper className="h-6 w-6" />
+            <span className="text-xs">News</span>
+          </Button>
+          <Button
+            variant="ghost"
+            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/settings' ? 'text-indigo-500' : 'text-slate-500'}`}
+            onClick={() => handleNav('/settings')}
+          >
+            <SettingsIcon className="h-6 w-6" />
+            <span className="text-xs">Settings</span>
+          </Button>
+        </div>
+      </nav>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-4">
@@ -64,8 +162,84 @@ function App() {
             Weekly Schedule
           </h1>
           <p className="text-slate-600 max-w-md mx-auto">Trimester-1</p>
-          <p className="text-slate-600 max-w-md mx-auto">made by nurik for nurik</p>
         </div>
+
+        <div className="mb-6 flex flex-col md:flex-row gap-2 justify-end items-center">
+          <Button
+            variant="ghost"
+            className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-md hover:from-indigo-600 hover:to-purple-600 rounded-xl px-6 py-2 transition-all duration-200"
+            onClick={() => setShowForm(v => !v)}
+          >
+            {showForm ? 'Hide' : 'Update the schedule'}
+          </Button>
+          <Button
+            variant="ghost"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-md hover:from-purple-600 hover:to-pink-600 rounded-xl px-6 py-2 transition-all duration-200"
+            onClick={() => setShowFilter(v => !v)}
+          >
+            {showFilter ? 'Hide' : 'Filters'}
+          </Button>
+        </div>
+        {showFilter && (
+          <div className="mb-6 max-w-md w-full mx-auto">
+            <div className="bg-white/95 rounded-2xl border border-slate-200 shadow-xl px-6 py-7">
+              <div className="flex items-center gap-2 mb-4">
+                <Badge className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-3 py-1 text-base font-semibold shadow">Filter</Badge>
+                <span className="text-base font-semibold text-slate-700">Hide subjects from schedule</span>
+              </div>
+              <div className="flex flex-wrap gap-3 justify-center">
+                {allSubjects.length === 0 ? (
+                  <span className="text-slate-400">No subjects to filter.</span>
+                ) : (
+                  allSubjects.map(subject => (
+                    <Button
+                      key={subject}
+                      type="button"
+                      variant={hiddenSubjects.includes(subject) ? "secondary" : "outline"}
+                      className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subject) ? 'bg-gradient-to-r from-slate-300 to-slate-200 text-slate-700 border-slate-400' : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'} hover:scale-105`}
+                      onClick={() => handleFilterChange(subject)}
+                    >
+                      {subject}
+                    </Button>
+                  ))
+                )}
+              </div>
+              <div className="text-xs text-slate-400 mt-4 text-center">Subjects you hide will not appear in your schedule for this group.</div>
+            </div>
+          </div>
+        )}
+
+        {showForm && (
+          <div className="mb-6 max-w-md w-full mx-auto">
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                handleFetchSchedule();
+              }}
+              className="flex flex-col gap-4 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200 shadow-lg px-6 py-6"
+            >
+              <label className="flex flex-col gap-1">
+                <Input
+                  type="text"
+                  placeholder="Enter group name..."
+                  value={group}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroup(e.target.value)}
+                  required
+                  className="text-base md:text-lg px-4 py-3 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition-all duration-200"
+                />
+                <span className="text-xs text-slate-400 pl-1">e.g. <span className="font-mono text-slate-500">SE-2417</span></span>
+              </label>
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-md hover:from-indigo-600 hover:to-purple-600 rounded-xl px-6 py-2 transition-all duration-200 w-full"
+              >
+                {loading ? 'Fetching...' : 'Fetch Schedule'}
+              </Button>
+              {error && <p className="text-red-500 text-sm text-center mt-2">{error}</p>}
+            </form>
+          </div>
+        )}
 
         <Tabs defaultValue="Monday" value={selectedDay} onValueChange={setSelectedDay} className="w-full">
           <div className="overflow-x-auto pb-2 mb-6">
@@ -85,61 +259,75 @@ function App() {
           {daysOfWeek.map(day => (
             <TabsContent key={day} value={day} className="mt-6">
               <div className="grid gap-4">
-                {scheduleData[day]?.length > 0 ? (
-                  scheduleData[day].map((item, index) => (
-                    <Card 
-                      key={index} 
-                      className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm"
-                    >
-                      <CardHeader className="pb-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
-                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
-                          <CardTitle className="text-xl font-bold text-slate-800">
-                            {item.discipline}
-                          </CardTitle>
-                          <Badge 
-                            className={`text-sm font-semibold px-3 py-1 ${
-                              item.type === 'lecture' 
-                                ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' 
-                                : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
-                            }`}
-                          >
-                            {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                          </Badge>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
-                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 mr-3">
-                              <Clock className="h-5 w-5" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-slate-500">Time</p>
-                              <p className="font-medium">{item.time}</p>
-                            </div>
+                {scheduleData[day]?.filter(item => !hiddenSubjects.includes(item.discipline)).length > 0 ? (
+                  scheduleData[day]
+                    .filter(item => !hiddenSubjects.includes(item.discipline))
+                    .map((item, index) => (
+                      <Card 
+                        key={index} 
+                        className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm"
+                      >
+                        <CardHeader className="pb-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
+                          <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2">
+                            <CardTitle className="text-xl font-bold text-slate-800">
+                              {item.discipline}
+                            </CardTitle>
+                            <Badge 
+                              className={`text-sm font-semibold px-3 py-1 ${
+                                item.type === 'lecture' 
+                                  ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' 
+                                  : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                              }`}
+                            >
+                              {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
+                            </Badge>
                           </div>
-                          <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
-                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-100 text-purple-600 mr-3">
-                              <MapPin className="h-5 w-5" />
+                        </CardHeader>
+                        <CardContent className="pt-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                            <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-blue-100 text-blue-600 mr-3">
+                                <Clock className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-slate-500">Time</p>
+                                <p className="font-medium">{item.time}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-sm text-slate-500">Location</p>
-                              <p className="font-medium">{item.classroom}</p>
+                            <div className="flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-purple-100 text-purple-600 mr-3">
+                                <MapPin className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-slate-500">Location</p>
+                                <p className="font-medium">{item.classroom}</p>
+                              </div>
                             </div>
+                            <div className="md:col-span-2 flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-amber-100 text-amber-600 mr-3">
+                                <User className="h-5 w-5" />
+                              </div>
+                              <div className="truncate">
+                                <p className="text-sm text-slate-500">Instructor</p>
+                                <p className="font-medium truncate">{item.lector}</p>
+                              </div>
+                            </div>
+                            {item.teamsMeetingUrl && (
+                              <div className="md:col-span-2 flex items-center text-slate-700 p-3 bg-blue-50 rounded-lg">
+                                <a
+                                  href={item.teamsMeetingUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 underline font-medium truncate"
+                                >
+                                  Join Teams Meeting
+                                </a>
+                              </div>
+                            )}
                           </div>
-                          <div className="md:col-span-2 flex items-center text-slate-700 p-3 bg-slate-50 rounded-lg">
-                            <div className="flex items-center justify-center h-10 w-10 rounded-full bg-amber-100 text-amber-600 mr-3">
-                              <User className="h-5 w-5" />
-                            </div>
-                            <div className="truncate">
-                              <p className="text-sm text-slate-500">Instructor</p>
-                              <p className="font-medium truncate">{item.lector}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                        </CardContent>
+                      </Card>
+                    ))
                 ) : (
                   <Card className="text-center py-12 border-dashed border-2 border-slate-200 bg-slate-50/50">
                     <CardContent>
@@ -157,12 +345,6 @@ function App() {
             </TabsContent>
           ))}
         </Tabs>
-
-        <footer className="text-center mt-16 pt-8 border-t border-slate-200/50">
-          <p className="text-slate-500 flex items-center justify-center gap-1">
-            Vibecoded
-          </p>
-        </footer>
       </div>
     </div>
   );
