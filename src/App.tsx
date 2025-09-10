@@ -138,8 +138,8 @@ function App() {
   return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24 pt-8 px-4">
       {/* Fixed Footer Navbar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
-        <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-2">
+      <nav className="fixed bottom-0 left-0 w-full h-15 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
+        <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-3">
           <Button
             variant="ghost"
             className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/' ? 'text-indigo-600' : 'text-slate-500'}`}
@@ -202,8 +202,8 @@ function App() {
           </Button>
         </div>
         {showFilter && (
-          <div className="mb-6 max-w-md w-full mx-auto">
-            <div className="bg-white/95 rounded-2xl border border-slate-200 shadow-xl px-6 py-7">
+          <div className="mb-6 w-full mx-auto">
+            <div className="bg-white/95 rounded-2xl border border-slate-200 shadow-xl px-4 py-7 max-w-full md:max-w-3xl md:px-8" style={{ margin: '0 auto' }}>
               <div className="flex items-center gap-2 mb-4">
                 <Badge className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-3 py-1 text-base font-semibold shadow">Filter</Badge>
                 <span className="text-base font-semibold text-slate-700">Hide subjects from schedule</span>
@@ -249,13 +249,14 @@ function App() {
         )}
 
         {showForm && (
-          <div className="mb-6 max-w-md w-full mx-auto">
+          <div className="mb-6 w-full mx-auto">
             <form
               onSubmit={e => {
                 e.preventDefault();
                 handleFetchSchedule();
               }}
-              className="flex flex-col gap-4 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200 shadow-lg px-6 py-6"
+              className="flex flex-col gap-4 bg-white/90 backdrop-blur-sm rounded-xl border border-slate-200 shadow-lg px-4 py-6 max-w-full md:max-w-3xl md:px-8"
+              style={{ margin: '0 auto' }}
             >
               <label className="flex flex-col gap-1">
                 <Input
