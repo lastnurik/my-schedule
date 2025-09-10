@@ -56,7 +56,7 @@ function App() {
     const service = new ScheduleService();
     const local = service.getLocalSchedule(groupName);
     if (local) {
-      setScheduleData(local);
+      setScheduleData(local as ScheduleData);
       // Load hidden subjects for group
       const hidden = localStorage.getItem(`hiddenSubjects_${groupName}`);
       setHiddenSubjects(hidden ? JSON.parse(hidden) : []);
@@ -89,7 +89,7 @@ function App() {
       // Offline: use local only
       const service = new ScheduleService();
       const local = service.getLocalSchedule(group);
-      setScheduleData(local || {});
+  setScheduleData((local || {}) as ScheduleData);
       setError("You are offline. Showing stored schedule.");
       return;
     }
@@ -99,7 +99,7 @@ function App() {
       const service = new ScheduleService();
       // Fetch from API and update local storage only when button is pressed
       const data = await service.fetchSchedule(group);
-      setScheduleData(data);
+  setScheduleData(data as ScheduleData);
       service.storeScheduleLocally(group, data);
       localStorage.setItem('lastGroup', group);
       setShowForm(false);
@@ -260,9 +260,9 @@ function App() {
                 {scheduleData[day]?.filter(item => !hiddenSubjects.includes(item.discipline)).length > 0 ? (
                   scheduleData[day]
                     .filter(item => !hiddenSubjects.includes(item.discipline))
-                    .map((item, index) => (
+                    .map((item) => (
                       <Card 
-                        key={index} 
+                        key={item.time + item.discipline + item.classroom} 
                         className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 bg-white/90 backdrop-blur-sm"
                       >
                         <CardHeader className="pb-3 bg-gradient-to-r from-slate-50 to-white border-b border-slate-100">
