@@ -89,7 +89,6 @@ function formatDescription(text: string): string {
 
 function AssignmentsPage() {
   const [calendarUrl] = useState<string>(() => localStorage.getItem("calendarUrl") || "");
-  const [icsData, setIcsData] = useState<string>("");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -103,7 +102,6 @@ function AssignmentsPage() {
       fetch(proxyUrl)
         .then((r) => r.text())
         .then((ics) => {
-          setIcsData(ics);
           setEvents(parseICS(ics));
           setLoading(false);
         })
