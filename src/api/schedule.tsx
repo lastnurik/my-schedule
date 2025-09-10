@@ -53,8 +53,8 @@ class ScheduleService {
 				}
 			});
 		}
-		// Ensure all weekdays exist in mapped
-		['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'].forEach(day => {
+		// Ensure all weekdays (and Sunday) exist in mapped
+		['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].forEach(day => {
 			if (!mapped[day]) mapped[day] = [];
 		});
 		return mapped;
