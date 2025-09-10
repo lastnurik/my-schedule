@@ -65,20 +65,43 @@ function App() {
       setHiddenSubjects([]);
     }
   };
-  // Get all unique subjects in current schedule
+  // For all language subjects, always use discipline+teacher for filtering
+  const languageSubjects = [
+    'Foreign language',
+    'Kazakh language',
+    'Russian language',
+    'Казахский язык',
+    'Русский язык',
+    'Иностранный язык',
+    'Казах тілі',
+    'Орыс тілі',
+    'Ағылшын тілі',
+    'Ағылшын язык',
+    'German language',
+    'Chinese language',
+    'Немецкий язык',
+    'Китайский язык',
+    // add more if needed
+  ];
   const allSubjects = Array.from(
     new Set(
-      Object.values(scheduleData).flat().map(item => item.discipline)
+      Object.values(scheduleData)
+        .flat()
+        .map(item =>
+          languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+            ? `${item.discipline}__${item.lector}`
+            : item.discipline
+        )
     )
   );
 
   // Handle filter change
-  const handleFilterChange = (subject: string) => {
+  const handleFilterChange = (subjectKey: string) => {
     let updated: string[];
-    if (hiddenSubjects.includes(subject)) {
-      updated = hiddenSubjects.filter(s => s !== subject);
+    if (hiddenSubjects.includes(subjectKey)) {
+      updated = hiddenSubjects.filter(s => s !== subjectKey);
     } else {
-      updated = [...hiddenSubjects, subject];
+      updated = [...hiddenSubjects, subjectKey];
     }
     setHiddenSubjects(updated);
     localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify(updated));
@@ -189,17 +212,35 @@ function App() {
                 {allSubjects.length === 0 ? (
                   <span className="text-slate-400">No subjects to filter.</span>
                 ) : (
-                  allSubjects.map(subject => (
-                    <Button
-                      key={subject}
-                      type="button"
-                      variant={hiddenSubjects.includes(subject) ? "secondary" : "outline"}
-                      className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subject) ? 'bg-gradient-to-r from-slate-300 to-slate-200 text-slate-700 border-slate-400' : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'} hover:scale-105`}
-                      onClick={() => handleFilterChange(subject)}
-                    >
-                      {subject}
-                    </Button>
-                  ))
+                  allSubjects.map(subjectKey => {
+                    if (subjectKey.includes('__')) {
+                      const [discipline, lector] = subjectKey.split('__');
+                      return (
+                        <Button
+                          key={subjectKey}
+                          type="button"
+                          variant={hiddenSubjects.includes(subjectKey) ? "secondary" : "outline"}
+                          className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subjectKey) ? 'bg-gradient-to-r from-slate-300 to-slate-200 text-slate-700 border-slate-400' : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'} hover:scale-105`}
+                          onClick={() => handleFilterChange(subjectKey)}
+                        >
+                          <span>{discipline}</span>
+                          <span className="ml-2 text-xs text-slate-400">{lector}</span>
+                        </Button>
+                      );
+                    } else {
+                      return (
+                        <Button
+                          key={subjectKey}
+                          type="button"
+                          variant={hiddenSubjects.includes(subjectKey) ? "secondary" : "outline"}
+                          className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subjectKey) ? 'bg-gradient-to-r from-slate-300 to-slate-200 text-slate-700 border-slate-400' : 'border-slate-200 hover:border-purple-400 hover:bg-purple-50'} hover:scale-105`}
+                          onClick={() => handleFilterChange(subjectKey)}
+                        >
+                          {subjectKey}
+                        </Button>
+                      );
+                    }
+                  })
                 )}
               </div>
               <div className="text-xs text-slate-400 mt-4 text-center">Subjects you hide will not appear in your schedule for this group.</div>
@@ -257,9 +298,19 @@ function App() {
           {daysOfWeek.map(day => (
             <TabsContent key={day} value={day} className="mt-6">
               <div className="grid gap-4">
-                {scheduleData[day]?.filter(item => !hiddenSubjects.includes(item.discipline)).length > 0 ? (
+                {scheduleData[day]?.filter(item => {
+                  const key = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+                    ? `${item.discipline}__${item.lector}`
+                    : item.discipline;
+                  return !hiddenSubjects.includes(key);
+                }).length > 0 ? (
                   scheduleData[day]
-                    .filter(item => !hiddenSubjects.includes(item.discipline))
+                    .filter(item => {
+                      const key = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+                        ? `${item.discipline}__${item.lector}`
+                        : item.discipline;
+                      return !hiddenSubjects.includes(key);
+                    })
                     .map((item) => (
                       <Card 
                         key={item.time + item.discipline + item.classroom} 
