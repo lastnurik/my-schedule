@@ -37,7 +37,7 @@ class ScheduleService {
 							time: item.classtime_time,
 							discipline: item.subject,
 							classroom: item.room,
-							type: item.lesson_type,
+							type: item.lesson_type === 'lecture' ? 'lecture' : 'practice',
 							lector: item.tutor,
 							teamsMeetingUrl: item.teamsMeetingUrl || null,
 						}))
