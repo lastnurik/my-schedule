@@ -25,7 +25,7 @@ function SettingsPage() {
           <h3 className="text-lg font-semibold text-slate-700 mb-2">Contact</h3>
           <div className="flex gap-4">
             <Button asChild variant="outline" className="flex items-center gap-2">
-              <a href="https://t.me/last_nurik" target="_blank" rel="noopener noreferrer">
+              <a href="t.me/nurik_xxx7" target="_blank" rel="noopener noreferrer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-telegram"><path d="M22 2L11 13"/><path d="M22 2L15 22L11 13L2 9L22 2Z"/></svg>
                 Telegram
               </a>
