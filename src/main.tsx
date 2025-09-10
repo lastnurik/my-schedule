@@ -1,4 +1,4 @@
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import App from './App.tsx';
@@ -6,10 +6,6 @@ import MapPage from './map';
 import NewsPage from './news';
 import SettingsPage from './settings';
 import './index.css';
-
-
-
-import { useEffect, useState } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 // UpdateToast removed
