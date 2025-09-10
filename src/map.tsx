@@ -71,7 +71,7 @@ function MapPage() {
         </div>
       </div>
       {/* Fixed Footer Navbar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
+      <nav className="fixed bottom-0 left-0 w-full h-15 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
         <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-2">
           <Button
             variant="ghost"

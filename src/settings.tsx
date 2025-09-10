@@ -1,4 +1,3 @@
-// ...existing code...
 import { Settings, Calendar, MapPin, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -11,7 +10,6 @@ function SettingsPage() {
       navigate(path);
     }
   };
-  // State for toggles and time selection
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24">
@@ -54,7 +52,7 @@ function SettingsPage() {
         </div>
       </div>
       {/* Fixed Footer Navbar */}
-      <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
+      <nav className="fixed bottom-0 left-0 w-full h-15 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
         <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-2">
           <Button
             variant="ghost"
