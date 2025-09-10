@@ -1,9 +1,22 @@
 // ScheduleService: fetches, maps, sorts, and stores schedule data for a group
+type ScheduleItem = {
+	time: string;
+	discipline: string;
+	classroom: string;
+	type: string;
+	lector: string;
+	teamsMeetingUrl?: string | null;
+};
+
+type ScheduleData = {
+	[key: string]: ScheduleItem[];
+};
+
 class ScheduleService {
 	static API_URL = 'https://my-schedule-api-hjb3dcftc6asb7d8.germanywestcentral-01.azurewebsites.net/api/schedulestorage/';
 
 	// Fetch schedule for a group
-	async fetchSchedule(groupName) {
+	async fetchSchedule(groupName: string): Promise<ScheduleData> {
 		const url = `${ScheduleService.API_URL}${encodeURIComponent(groupName)}`;
 		const response = await fetch(url);
 		if (!response.ok) throw new Error('Failed to fetch schedule');
@@ -12,15 +25,15 @@ class ScheduleService {
 	}
 
 	// Map and sort schedule data from new API format
-	mapAndSortSchedule(apiData) {
+	mapAndSortSchedule(apiData: any): ScheduleData {
 		// apiData.days is an array of { day: string, items: [...] }
-		const mapped = {};
+		const mapped: ScheduleData = {};
 		if (Array.isArray(apiData.days)) {
-			apiData.days.forEach(dayObj => {
-				const dayName = dayObj.day;
+			apiData.days.forEach((dayObj: any) => {
+				const dayName: string = dayObj.day;
 				if (Array.isArray(dayObj.items)) {
 					mapped[dayName] = dayObj.items
-						.map(item => ({
+						.map((item: any): ScheduleItem => ({
 							time: item.classtime_time,
 							discipline: item.subject,
 							classroom: item.room,
@@ -28,7 +41,7 @@ class ScheduleService {
 							lector: item.tutor,
 							teamsMeetingUrl: item.teamsMeetingUrl || null,
 						}))
-						.sort((a, b) => a.time.localeCompare(b.time));
+						.sort((a: ScheduleItem, b: ScheduleItem) => a.time.localeCompare(b.time));
 				} else {
 					mapped[dayName] = [];
 				}
@@ -42,7 +55,7 @@ class ScheduleService {
 	}
 
 	// Store schedule locally (browser & iOS PWA compatible)
-	storeScheduleLocally(groupName, scheduleData) {
+	storeScheduleLocally(groupName: string, scheduleData: ScheduleData): void {
 		try {
 			// Use localStorage for browser and iOS PWA
 			localStorage.setItem(`schedule_${groupName}`, JSON.stringify(scheduleData));
@@ -54,7 +67,7 @@ class ScheduleService {
 	}
 
 	// Get schedule from local storage
-	getLocalSchedule(groupName) {
+	getLocalSchedule(groupName: string): ScheduleData | null {
 		try {
 			const data = localStorage.getItem(`schedule_${groupName}`);
 			return data ? JSON.parse(data) : null;
@@ -64,7 +77,7 @@ class ScheduleService {
 	}
 
 	// Main method: fetch, process, and store
-	async getSchedule(groupName) {
+	async getSchedule(groupName: string): Promise<ScheduleData | null> {
 		let schedule = this.getLocalSchedule(groupName);
 		if (!schedule) {
 			schedule = await this.fetchSchedule(groupName);
