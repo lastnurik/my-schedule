@@ -8,6 +8,7 @@ import { Calendar, Clock, MapPin, User, Newspaper, Settings as SettingsIcon } fr
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ScheduleService from "@/api/schedule";
+import Navbar from './components/Navbar';
 
 type ScheduleItem = {
   time: string;
@@ -138,42 +139,7 @@ function App() {
   return (
   <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24 pt-8 px-4">
       {/* Fixed Footer Navbar */}
-      <nav className="fixed bottom-0 left-0 w-full h-15 z-50 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg">
-        <div className="max-w-2xl mx-auto flex justify-between items-center px-6 py-3">
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/' ? 'text-indigo-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/')}
-          >
-            <Calendar className="h-6 w-6" />
-            <span className="text-xs">Main</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/map' ? 'text-purple-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/map')}
-          >
-            <MapPin className="h-6 w-6" />
-            <span className="text-xs">Map</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/news' ? 'text-pink-600' : 'text-slate-500'}`}
-            onClick={() => handleNav('/news')}
-          >
-            <Newspaper className="h-6 w-6" />
-            <span className="text-xs">News</span>
-          </Button>
-          <Button
-            variant="ghost"
-            className={`flex flex-col items-center gap-1 px-2 py-1 rounded-lg ${location.pathname === '/settings' ? 'text-indigo-500' : 'text-slate-500'}`}
-            onClick={() => handleNav('/settings')}
-          >
-            <SettingsIcon className="h-6 w-6" />
-            <span className="text-xs">Settings</span>
-          </Button>
-        </div>
-      </nav>
+      <Navbar></Navbar>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full mb-4">
