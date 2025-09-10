@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User, Newspaper, Settings as SettingsIcon } from 'lucide-react';
+import { Calendar, Clock, MapPin, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ScheduleService from "@/api/schedule";
@@ -24,14 +22,6 @@ type ScheduleData = {
 };
 
 function App() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  // Footer navigation handler
-  const handleNav = (path: string) => {
-    if (location.pathname !== path) {
-      navigate(path);
-    }
-  };
   const [scheduleData, setScheduleData] = useState<ScheduleData>({});
   const [selectedDay, setSelectedDay] = useState<string>('Monday');
   const [group, setGroup] = useState<string>('');

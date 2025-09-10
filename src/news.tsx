@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Newspaper, ChevronDown, ChevronUp } from "lucide-react";
 import Navbar from "./components/Navbar";
 
-// Define types for our event data
 interface CalendarEvent {
   summary: string;
   start: string;
@@ -15,7 +14,6 @@ interface CalendarEvent {
 function parseICS(ics: string): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const blocks = ics.split("BEGIN:VEVENT").slice(1);
-  
   for (const block of blocks) {
     const lines = block.split(/\r?\n/);
     const event: Partial<CalendarEvent> = {};
@@ -26,24 +24,22 @@ function parseICS(ics: string): CalendarEvent[] {
       else if (line.startsWith("DTEND:")) event.end = line.slice(6);
       else if (line.startsWith("DESCRIPTION:")) {
         flag = true;
-         event.description = line.slice(12);
+        event.description = line.slice(12);
       }
       else if (line.startsWith("LOCATION:")) event.location = line.slice(9);
       else if (line.startsWith("CATEGORIES:")) event.categories = line.slice(11);
       else if (flag === true) {
         if (line.startsWith("CLASS")) {
-            flag = false;
-            continue;
+          flag = false;
+          continue;
         }
         event.description += line;
       }
     }
-    
     if (event.summary && event.start) {
       events.push(event as CalendarEvent);
     }
   }
-  
   return events;
 }
 
@@ -60,7 +56,6 @@ function timeRemaining(dt: string): string {
   if (!dt) return "";
   const now = new Date();
   let target: Date;
-  
   if (dt.length >= 15) {
     target = new Date(Date.UTC(
       parseInt(dt.slice(0, 4)),
@@ -79,29 +74,21 @@ function timeRemaining(dt: string): string {
   } else {
     return "";
   }
-  
   const diff = target.getTime() - now.getTime();
   if (diff < 0) return "Expired";
-  
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const mins = Math.floor((diff / (1000 * 60)) % 60);
-  
   return `${days}d ${hours}h ${mins}m`;
 }
 
 function formatDescription(text: string): string {
   if (!text) return "";
-  return text
-    .replace(/\\n/g, '\n')
-    .replace(/\\+/g, '')
-    .trim();
+  return text.replace(/\\n/g, '\n').replace(/\\+/g, '').trim();
 }
 
 function AssignmentsPage() {
-  const [calendarUrl, setCalendarUrl] = useState<string>(() => 
-    localStorage.getItem("calendarUrl") || ""
-  );
+  const [calendarUrl] = useState<string>(() => localStorage.getItem("calendarUrl") || "");
   const [icsData, setIcsData] = useState<string>("");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -113,15 +100,12 @@ function AssignmentsPage() {
       setLoading(true);
       setError("");
       const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(calendarUrl)}`;
-      
       fetch(proxyUrl)
         .then((r) => r.text())
         .then((ics) => {
           setIcsData(ics);
-          const parsedEvents = parseICS(ics);
-          setEvents(parsedEvents);
+          setEvents(parseICS(ics));
           setLoading(false);
-          console.log(ics);
         })
         .catch(() => {
           setError("Failed to fetch calendar. Check the URL or try uploading the file manually.");
@@ -149,8 +133,7 @@ function AssignmentsPage() {
           {loading && <div className="text-slate-500">Loading assignments...</div>}
           {error && <div className="text-red-500">{error}</div>}
         </div>
-        
-        {events.length > 0 ? (
+        {events.length > 0 && (
           <div className="mb-8">
             <h3 className="text-lg font-semibold mb-2">Upcoming Assignments</h3>
             <div className="grid gap-4">
@@ -159,10 +142,8 @@ function AssignmentsPage() {
                 .sort((a, b) => {
                   const getTime = (dt: string) => {
                     if (!dt) return Infinity;
-                    let target: number;
-                    
                     if (dt.length >= 15) {
-                      target = Date.UTC(
+                      return Date.UTC(
                         parseInt(dt.slice(0, 4)),
                         parseInt(dt.slice(4, 6)) - 1,
                         parseInt(dt.slice(6, 8)),
@@ -171,7 +152,7 @@ function AssignmentsPage() {
                         parseInt(dt.slice(13, 15))
                       );
                     } else if (dt.length >= 8) {
-                      target = new Date(
+                      return new Date(
                         parseInt(dt.slice(0, 4)),
                         parseInt(dt.slice(4, 6)) - 1,
                         parseInt(dt.slice(6, 8))
@@ -179,10 +160,7 @@ function AssignmentsPage() {
                     } else {
                       return Infinity;
                     }
-                    
-                    return target;
                   };
-                  
                   return getTime(a.start) - getTime(b.start);
                 })
                 .map((ev, index) => {
@@ -190,45 +168,22 @@ function AssignmentsPage() {
                   const assignment = ev.summary || "Assignment";
                   const info = formatDescription(ev.description) || "";
                   const isExpanded = expandedCards.has(index);
-                  
                   return (
-                    <div 
+                    <div
                       key={`${ev.summary}-${ev.start}-${index}`}
-                      className={`bg-white rounded-lg shadow p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 ${
-                        isExpanded ? 'ring-2 ring-indigo-300' : ''
-                      }`}
+                      className={`bg-white rounded-lg shadow p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 ${isExpanded ? 'ring-2 ring-indigo-300' : ''}`}
                       onClick={() => toggleCard(index)}
                     >
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-indigo-700 text-lg">{course}</span>
                         <span className="text-xs text-slate-400">{formatDate(ev.start)}</span>
                       </div>
-                      
                       <div className="text-slate-700 text-base font-semibold">{assignment}</div>
-                      
-                      <div className={`text-slate-500 text-sm overflow-hidden ${
-                        isExpanded ? '' : 'line-clamp-2'
-                      }`}>
-                        {info}
-                      </div>
-                      
+                      <div className={`text-slate-500 text-sm overflow-hidden ${isExpanded ? '' : 'line-clamp-2'}`}>{info}</div>
                       <div className="flex justify-between items-center text-xs mt-2">
-                        <span
-                            className={`
-                                font-bold 
-                                text-red-700 
-                                text-bg 
-                            `}
-                            >
-                            ⏳ Time left: {timeRemaining(ev.start)}
-                            </span>
-
-                        
+                        <span className="font-bold text-red-700 text-bg">⏳ Time left: {timeRemaining(ev.start)}</span>
                         <div className="flex items-center">
-                          {ev.location && (
-                            <span className="text-slate-400 mr-2">{ev.location}</span>
-                          )}
-                          
+                          {ev.location && <span className="text-slate-400 mr-2">{ev.location}</span>}
                           {isExpanded ? (
                             <ChevronUp className="h-4 w-4 text-slate-400" />
                           ) : (
@@ -241,18 +196,14 @@ function AssignmentsPage() {
                 })}
             </div>
           </div>
-        ) : null}
-        
-        {events.length > 0 ? (
+        )}
+        {events.length > 0 && (
           <div className="bg-white rounded-lg shadow p-4 mt-4">
             <h3 className="text-lg font-semibold mb-2">Calendar (coming soon)</h3>
-            <div className="text-slate-400 text-sm">
-              A visual calendar will be shown here in future updates.
-            </div>
+            <div className="text-slate-400 text-sm">A visual calendar will be shown here in future updates.</div>
           </div>
-        ) : null}
+        )}
       </div>
-      
       <Navbar />
     </div>
   );
