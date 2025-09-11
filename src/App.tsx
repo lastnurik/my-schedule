@@ -299,7 +299,9 @@ function App() {
                   })
                 )}
               </div>
-              <button onClick={() => setShowFilter(false)} className="absolute top-4 right-4 px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold shadow">Close</button>
+              <div className="w-full flex justify-end mt-2">
+                <button onClick={() => setShowFilter(false)} className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold shadow">Close</button>
+              </div>
             </div>
           </div>
         )}
