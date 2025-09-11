@@ -264,7 +264,7 @@ function App() {
           <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm`}> 
             <div className={`relative w-full max-w-md mx-auto rounded-2xl shadow-2xl border ${modalBg} ${modalBorder} px-6 py-6`}>
               <h3 className={`text-lg font-bold mb-4 ${modalText}`}>Filter Subjects</h3>
-              <div className="max-h-[50vh] overflow-y-auto mb-4">
+              <div className="max-h-[50vh] overflow-y-auto mb-4 flex flex-col gap-2">
                 {allSubjects.length === 0 ? (
                   <span className={`${emptyCardText}`}>No subjects to filter.</span>
                 ) : (
