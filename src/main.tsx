@@ -7,6 +7,8 @@ import NewsPage from './news';
 import SettingsPage from './settings';
 import './index.css';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { Analytics } from '@vercel/analytics/react';
+
 
 // UpdateToast removed
 
@@ -31,6 +33,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <PWAUpdateHandler />
+      <Analytics />
     </BrowserRouter>
   </StrictMode>
 )
