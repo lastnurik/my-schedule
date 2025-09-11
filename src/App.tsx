@@ -24,7 +24,7 @@ type ScheduleData = {
 
 function App() {
   // Get theme from localStorage
-  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark-blue') : 'dark-blue';
+  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
   let pageBg = '', glow1 = '', glow2 = '';
   let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '', modalBadge = '';
   let practiceText = '', lectureText = '';

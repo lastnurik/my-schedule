@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { MapPin } from "lucide-react";
 import Navbar from "./components/Navbar";
 function MapPage() {
-  const [theme, setTheme] = useState(typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark-blue') : 'dark-blue');
+  const [theme, setTheme] = useState(typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white');
   useEffect(() => {
-    const handler = () => setTheme(localStorage.getItem('theme') || 'dark-blue');
+  const handler = () => setTheme(localStorage.getItem('theme') || 'white');
     window.addEventListener('storage', handler);
     window.addEventListener('themechange', handler);
     return () => {
