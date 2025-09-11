@@ -26,7 +26,7 @@ function App() {
   // Get theme from localStorage
   const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
   let pageBg = '', glow1 = '', glow2 = '';
-  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '', modalBadge = '';
+  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '';
   let practiceText = '', lectureText = '';
   if (theme === 'dark-blue') {
     pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
@@ -50,7 +50,6 @@ function App() {
     modalBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
     modalBorder = 'border-blue-900';
     modalText = 'text-blue-200';
-    modalBadge = 'bg-gradient-to-r from-blue-500 to-purple-500 text-white';
     practiceText = 'text-cyan-300';
     lectureText = 'text-purple-300';
   } else if (theme === 'white') {
@@ -75,7 +74,6 @@ function App() {
     modalBg = 'bg-white';
     modalBorder = 'border-slate-200';
     modalText = 'text-slate-700';
-    modalBadge = 'bg-gradient-to-r from-slate-100 to-white text-slate-700';
     practiceText = 'text-blue-500';
     lectureText = 'text-red-500';
   } else {
@@ -100,7 +98,6 @@ function App() {
     modalBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
     modalBorder = 'border-red-900';
     modalText = 'text-red-200';
-    modalBadge = 'bg-gradient-to-r from-red-700 to-pink-700 text-white';
     practiceText = 'text-yellow-300';
     lectureText = 'text-pink-300';
   }
