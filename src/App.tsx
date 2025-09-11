@@ -26,7 +26,7 @@ function App() {
   // Get theme from localStorage
   const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
   let pageBg = '', glow1 = '', glow2 = '';
-  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '', modalBadge = '';
+  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '';
   let practiceText = '', lectureText = '';
   if (theme === 'dark-blue') {
     pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
@@ -50,7 +50,6 @@ function App() {
     modalBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
     modalBorder = 'border-blue-900';
     modalText = 'text-blue-200';
-    modalBadge = 'bg-gradient-to-r from-blue-500 to-purple-500 text-white';
     practiceText = 'text-cyan-300';
     lectureText = 'text-purple-300';
   } else if (theme === 'white') {
@@ -75,7 +74,6 @@ function App() {
     modalBg = 'bg-white';
     modalBorder = 'border-slate-200';
     modalText = 'text-slate-700';
-    modalBadge = 'bg-gradient-to-r from-slate-100 to-white text-slate-700';
     practiceText = 'text-blue-500';
     lectureText = 'text-red-500';
   } else {
@@ -100,7 +98,6 @@ function App() {
     modalBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
     modalBorder = 'border-red-900';
     modalText = 'text-red-200';
-    modalBadge = 'bg-gradient-to-r from-red-700 to-pink-700 text-white';
     practiceText = 'text-yellow-300';
     lectureText = 'text-pink-300';
   }
@@ -264,13 +261,10 @@ function App() {
 
         {/* Filter Modal */}
         {showFilter && (
-          <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className={`${modalBg} rounded-3xl border ${modalBorder} shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto`}>
-              <div className="flex items-center gap-2 mb-4">
-                <Badge className={`${modalBadge} px-3 py-1 text-base font-semibold shadow`}>Filter</Badge>
-                <span className={`text-base font-semibold ${modalText}`}>Hide subjects from schedule</span>
-              </div>
-              <div className="flex flex-wrap gap-3 justify-center">
+          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm`}> 
+            <div className={`relative w-full max-w-md mx-auto rounded-2xl shadow-2xl border ${modalBg} ${modalBorder} px-6 py-6`}>
+              <h3 className={`text-lg font-bold mb-4 ${modalText}`}>Filter Subjects</h3>
+              <div className="max-h-[50vh] overflow-y-auto mb-4 flex flex-col gap-2">
                 {allSubjects.length === 0 ? (
                   <span className={`${emptyCardText}`}>No subjects to filter.</span>
                 ) : (
@@ -305,12 +299,9 @@ function App() {
                   })
                 )}
               </div>
-              <div className={`text-xs ${emptyCardText} mt-4 text-center`}>Subjects you hide will not appear in your schedule for this group.</div>
-              <Button
-                variant="ghost"
-                className="mt-6 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold shadow rounded-xl px-6 py-2"
-                onClick={() => setShowFilter(false)}
-              >Close</Button>
+              <div className="w-full flex justify-end mt-2">
+                <button onClick={() => setShowFilter(false)} className="px-4 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold shadow">Close</button>
+              </div>
             </div>
           </div>
         )}
