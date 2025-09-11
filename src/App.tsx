@@ -264,13 +264,10 @@ function App() {
 
         {/* Filter Modal */}
         {showFilter && (
-          <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className={`${modalBg} rounded-3xl border ${modalBorder} shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto`}>
-              <div className="flex items-center gap-2 mb-4">
-                <Badge className={`${modalBadge} px-3 py-1 text-base font-semibold shadow`}>Filter</Badge>
-                <span className={`text-base font-semibold ${modalText}`}>Hide subjects from schedule</span>
-              </div>
-              <div className="flex flex-col gap-3 justify-center max-h-60 overflow-y-auto">
+          <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm`}> 
+            <div className={`relative w-full max-w-md mx-auto rounded-2xl shadow-2xl border ${modalBg} ${modalBorder} px-6 py-6`}>
+              <h3 className={`text-lg font-bold mb-4 ${modalText}`}>Filter Subjects</h3>
+              <div className="max-h-[50vh] overflow-y-auto mb-4">
                 {allSubjects.length === 0 ? (
                   <span className={`${emptyCardText}`}>No subjects to filter.</span>
                 ) : (
@@ -305,12 +302,7 @@ function App() {
                   })
                 )}
               </div>
-              <div className={`text-xs ${emptyCardText} mt-4 text-center`}>Subjects you hide will not appear in your schedule for this group.</div>
-              <Button
-                variant="ghost"
-                className="mt-6 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold shadow rounded-xl px-6 py-2"
-                onClick={() => setShowFilter(false)}
-              >Close</Button>
+              <button onClick={() => setShowFilter(false)} className="absolute top-4 right-4 px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold shadow">Close</button>
             </div>
           </div>
         )}
