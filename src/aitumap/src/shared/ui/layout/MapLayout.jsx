@@ -26,8 +26,8 @@ const MapLayout = ({ children }) => {
     <TransformWrapper defaultScale={1}>
       <TransformComponent>
         <svg
-          width={width}
-          height={height}
+          width={400}
+          height={500}
           xmlns={"http://www.w3.org/2000/svg"}
           viewBox={"0 0 924.69 396.16"}
         >
