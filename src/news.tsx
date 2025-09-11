@@ -89,7 +89,7 @@ function formatDescription(text: string): string {
 
 function AssignmentsPage() {
   // Get theme from localStorage
-  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark-blue') : 'dark-blue';
+  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
   let pageBg = '', glow1 = '', glow2 = '', cardBg = '', cardText = '', cardBorder = '', badgeBg = '', badgeText = '', dateText = '', infoText = '', timeText = '', locationText = '', calendarBg = '', calendarBorder = '', calendarTitle = '', calendarText = '';
   if (theme === 'dark-blue') {
     pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
