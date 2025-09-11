@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import Navbar from "./components/Navbar";
-// @ts-ignore: Allow importing .jsx in TSX
-import AITUMap from "./aitumap/src/app/App";
+// @ts-ignore
+import AITUMap from "./aitumap/src/app/App.jsx";
 
 // If you have App.tsx, make sure it has: export default function App() { ... }
 // If your build system requires .js extension, use:
 // import AITUMap from "./aitumap/src/app/App.js";
-
 
 function MapPage() {
   const location = useLocation();
