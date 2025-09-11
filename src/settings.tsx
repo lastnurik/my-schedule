@@ -35,7 +35,7 @@ function SettingsPage() {
   };
 
   // Theme classes for the whole page and theme card
-  let pageBg = "", glow1 = "", glow2 = "", contactBg = "", contactTitle = "", contactText = "", contactBorder = "", inputBg = "", inputText = "", inputPlaceholder = "", fetchBtn = "", calendarBg = "", calendarTitle = "", calendarText = "", calendarBorder = "", themeBg = "", themeTitle = "", themeText = "", themeBtn = "", themeBtnActive = "", lectureText = "", contactBtn = "";
+  let pageBg = "", glow1 = "", glow2 = "", contactBg = "", contactTitle = "", contactText = "", contactBorder = "", inputBg = "", inputText = "", inputPlaceholder = "", fetchBtn = "", calendarBg = "", calendarTitle = "", calendarText = "", calendarBorder = "", themeBg = "", themeTitle = "", themeText = "", themeBtn = "", themeBtnActive = "", contactBtn = "";
   if (theme === "dark-blue") {
   contactBtn = "bg-blue-900/40 hover:bg-blue-900/60";
     pageBg = "bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]";
@@ -58,7 +58,6 @@ function SettingsPage() {
     themeText = "text-blue-300";
     themeBtn = "bg-blue-900/10 text-blue-300 border-blue-200 hover:bg-blue-900/20";
     themeBtnActive = "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400";
-    lectureText = "text-purple-300";
   } else if (theme === "white") {
   contactBtn = "bg-slate-100 hover:bg-slate-200";
     pageBg = "bg-white";
@@ -81,7 +80,6 @@ function SettingsPage() {
     themeText = "text-slate-400";
     themeBtn = "bg-white/80 text-slate-500 border-slate-200 hover:bg-slate-100";
     themeBtnActive = "bg-gradient-to-r from-slate-100 to-white text-slate-700 border-slate-400";
-    lectureText = "text-red-500";
   } else {
   contactBtn = "bg-red-900/40 hover:bg-red-900/60";
     pageBg = "bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]";
@@ -104,7 +102,6 @@ function SettingsPage() {
     themeText = "text-red-200";
     themeBtn = "bg-red-900/10 text-red-300 border-red-200 hover:bg-red-900/20";
     themeBtnActive = "bg-gradient-to-r from-red-700 to-pink-700 text-white border-red-400";
-    lectureText = "text-pink-300";
   }
 
   return (
