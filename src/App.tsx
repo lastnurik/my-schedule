@@ -270,7 +270,7 @@ function App() {
                 <Badge className={`${modalBadge} px-3 py-1 text-base font-semibold shadow`}>Filter</Badge>
                 <span className={`text-base font-semibold ${modalText}`}>Hide subjects from schedule</span>
               </div>
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-col gap-3 justify-center max-h-60 overflow-y-auto">
                 {allSubjects.length === 0 ? (
                   <span className={`${emptyCardText}`}>No subjects to filter.</span>
                 ) : (
