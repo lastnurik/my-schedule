@@ -88,6 +88,61 @@ function formatDescription(text: string): string {
 }
 
 function AssignmentsPage() {
+  // Get theme from localStorage
+  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'dark-blue') : 'dark-blue';
+  let pageBg = '', glow1 = '', glow2 = '', cardBg = '', cardText = '', cardBorder = '', badgeBg = '', badgeText = '', dateText = '', infoText = '', timeText = '', locationText = '', calendarBg = '', calendarBorder = '', calendarTitle = '', calendarText = '';
+  if (theme === 'dark-blue') {
+    pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
+    glow1 = 'bg-gradient-to-br from-blue-700/40 via-indigo-600/30 to-purple-700/20';
+    glow2 = 'bg-gradient-to-tr from-purple-600/30 via-blue-500/20 to-indigo-700/10';
+    cardBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
+    cardText = 'text-white';
+    cardBorder = 'border-blue-900';
+    badgeBg = 'bg-gradient-to-br from-blue-500 to-indigo-600';
+    badgeText = 'text-white';
+    dateText = 'text-blue-300';
+    infoText = 'text-blue-200';
+    timeText = 'text-pink-400';
+    locationText = 'text-blue-300';
+    calendarBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
+    calendarBorder = 'border-blue-900';
+    calendarTitle = 'text-blue-200';
+    calendarText = 'text-blue-300';
+  } else if (theme === 'white') {
+    pageBg = 'bg-white';
+    glow1 = 'bg-white';
+    glow2 = 'bg-white';
+    cardBg = 'bg-white';
+    cardText = 'text-slate-700';
+    cardBorder = 'border-slate-200';
+    badgeBg = 'bg-gradient-to-br from-slate-100 to-white';
+    badgeText = 'text-slate-700';
+    dateText = 'text-slate-400';
+    infoText = 'text-slate-700';
+    timeText = 'text-pink-400';
+    locationText = 'text-slate-400';
+    calendarBg = 'bg-white';
+    calendarBorder = 'border-slate-200';
+    calendarTitle = 'text-slate-700';
+    calendarText = 'text-slate-400';
+  } else {
+    pageBg = 'bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]';
+    glow1 = 'bg-gradient-to-br from-red-700/40 via-pink-700/30 to-red-900/20';
+    glow2 = 'bg-gradient-to-tr from-pink-600/30 via-red-500/20 to-red-900/10';
+    cardBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
+    cardText = 'text-red-200';
+    cardBorder = 'border-red-900';
+    badgeBg = 'bg-gradient-to-br from-red-700 to-pink-700';
+    badgeText = 'text-white';
+    dateText = 'text-red-200';
+    infoText = 'text-red-200';
+    timeText = 'text-pink-400';
+    locationText = 'text-red-200';
+    calendarBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
+    calendarBorder = 'border-red-900';
+    calendarTitle = 'text-red-200';
+    calendarText = 'text-red-200';
+  }
   const [calendarUrl] = useState<string>(() => localStorage.getItem("calendarUrl") || "");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -123,17 +178,24 @@ function AssignmentsPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 pb-24">
-      <div className="w-full max-w-2xl mx-auto px-4 py-6">
+  <div className={`min-h-screen w-full ${pageBg} pb-24 pt-8 px-2 md:px-0 relative flex flex-col items-center`}>
+      {/* Glowing background effect */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vw] ${glow1} rounded-full blur-3xl opacity-70`} />
+        <div className={`absolute bottom-0 right-0 w-[40vw] h-[30vw] ${glow2} rounded-full blur-2xl opacity-60`} />
+      </div>
+      <div className="relative z-10 w-full max-w-md mx-auto px-4 py-6">
         <div className="flex flex-col items-center gap-4 mb-6">
-          <Newspaper className="h-16 w-16 text-pink-500" />
-          <h2 className="text-2xl font-bold text-slate-700">Assignments & Deadlines</h2>
-          {loading && <div className="text-slate-500">Loading assignments...</div>}
-          {error && <div className="text-red-500">{error}</div>}
+          <div className={`${badgeBg} rounded-full p-3 shadow-lg`}>
+            <Newspaper className={`h-8 w-8 ${badgeText}`} />
+          </div>
+          <h2 className={`text-2xl font-bold tracking-tight ${cardText}`}>Assignments & Deadlines</h2>
+          {loading && <div className={`${infoText}`}>Loading assignments...</div>}
+          {error && <div className="text-red-400">{error}</div>}
         </div>
         {events.length > 0 && (
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">Upcoming Assignments</h3>
+            <h3 className={`text-lg font-semibold mb-2 ${calendarTitle}`}>Upcoming Assignments</h3>
             <div className="grid gap-4">
               {events
                 .filter(ev => !ev.summary?.startsWith("Attendance "))
@@ -169,23 +231,23 @@ function AssignmentsPage() {
                   return (
                     <div
                       key={`${ev.summary}-${ev.start}-${index}`}
-                      className={`bg-white rounded-lg shadow p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 ${isExpanded ? 'ring-2 ring-indigo-300' : ''}`}
+                      className={`${cardBg} rounded-2xl shadow-2xl p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 border ${cardBorder} ${cardText} ${isExpanded ? (theme === 'dark-blue' ? 'ring-2 ring-blue-400' : theme === 'white' ? 'ring-2 ring-slate-400' : 'ring-2 ring-red-400') : ''}`}
                       onClick={() => toggleCard(index)}
                     >
                       <div className="flex justify-between items-center">
-                        <span className="font-bold text-indigo-700 text-lg">{course}</span>
-                        <span className="text-xs text-slate-400">{formatDate(ev.start)}</span>
+                        <span className={`font-bold text-lg ${calendarTitle}`}>{course}</span>
+                        <span className={`text-xs ${dateText}`}>{formatDate(ev.start)}</span>
                       </div>
-                      <div className="text-slate-700 text-base font-semibold">{assignment}</div>
-                      <div className={`text-slate-500 text-sm overflow-hidden ${isExpanded ? '' : 'line-clamp-2'}`}>{info}</div>
+                      <div className={`text-base font-semibold ${cardText}`}>{assignment}</div>
+                      <div className={`text-sm overflow-hidden ${infoText} ${isExpanded ? '' : 'line-clamp-2'}`}>{info}</div>
                       <div className="flex justify-between items-center text-xs mt-2">
-                        <span className="font-bold text-red-700 text-bg">⏳ Time left: {timeRemaining(ev.start)}</span>
+                        <span className={`font-bold ${timeText} text-bg`}>⏳ Time left: {timeRemaining(ev.start)}</span>
                         <div className="flex items-center">
-                          {ev.location && <span className="text-slate-400 mr-2">{ev.location}</span>}
+                          {ev.location && <span className={`${locationText} mr-2`}>{ev.location}</span>}
                           {isExpanded ? (
-                            <ChevronUp className="h-4 w-4 text-slate-400" />
+                            <ChevronUp className={`h-4 w-4 ${locationText}`} />
                           ) : (
-                            <ChevronDown className="h-4 w-4 text-slate-400" />
+                            <ChevronDown className={`h-4 w-4 ${locationText}`} />
                           )}
                         </div>
                       </div>
@@ -196,13 +258,15 @@ function AssignmentsPage() {
           </div>
         )}
         {events.length > 0 && (
-          <div className="bg-white rounded-lg shadow p-4 mt-4">
-            <h3 className="text-lg font-semibold mb-2">Calendar (coming soon)</h3>
-            <div className="text-slate-400 text-sm">A visual calendar will be shown here in future updates.</div>
+          <div className={`${calendarBg} rounded-2xl shadow-2xl p-4 mt-4 border ${calendarBorder}`}>
+            <h3 className={`text-lg font-semibold mb-2 ${calendarTitle}`}>Calendar (coming soon)</h3>
+            <div className={`text-sm ${calendarText}`}>A visual calendar will be shown here in future updates.</div>
           </div>
         )}
       </div>
-      <Navbar />
+      <div className="fixed bottom-0 left-0 w-full z-20">
+        <Navbar />
+      </div>
     </div>
   );
 }
