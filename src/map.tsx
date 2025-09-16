@@ -1,10 +1,19 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { MapPin } from "lucide-react";
 import Navbar from "./components/Navbar";
+// @ts-ignore
+import AITUMap from "./aitumap/src/app/App.jsx";
+
+// If you have App.tsx, make sure it has: export default function App() { ... }
+// If your build system requires .js extension, use:
+// import AITUMap from "./aitumap/src/app/App.js";
+
 function MapPage() {
+  const location = useLocation();
   const [theme, setTheme] = useState(typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white');
   useEffect(() => {
-  const handler = () => setTheme(localStorage.getItem('theme') || 'white');
+    const handler = () => setTheme(localStorage.getItem('theme') || 'white');
     window.addEventListener('storage', handler);
     window.addEventListener('themechange', handler);
     return () => {
@@ -44,26 +53,14 @@ function MapPage() {
     iconText = 'text-white';
     infoText = 'text-red-200';
   }
-  const [mapHtml, setMapHtml] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
   useEffect(() => {
-    const cacheKey = 'aituMapHtml';
-    const fetchAndCache = async () => {
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) {
-          setMapHtml(cached);
-        } else {
-          const resp = await fetch('https://yuujiso.github.io/aitumap');
-          if (resp.ok) {
-            const html = await resp.text();
-            setMapHtml(html);
-            localStorage.setItem(cacheKey, html);
-          }
-        }
-      } catch {}
-    };
-    fetchAndCache();
-  }, []);
+    // Get ?search= param from URL
+    const params = new URLSearchParams(location.search);
+    const search = params.get("search");
+    if (search) setSearchQuery(search);
+    else setSearchQuery("");
+  }, [location.search]);
   return (
     <div className={`min-h-screen w-full ${pageBg} pb-24 pt-8 px-2 md:px-0 relative flex flex-col`}>
       {/* Glowing background effect */}
@@ -79,26 +76,12 @@ function MapPage() {
             </span>
             <h2 className={`text-2xl font-bold tracking-tight ${cardText}`}>Map</h2>
           </div>
-          <div className={`rounded-2xl shadow-2xl px-0 py-0 flex flex-col items-center ${cardBg} ${cardBorder}`} style={{ minHeight: 'calc(70vh)' }}>
-            {/* Try to use cached HTML if available and online, else fallback to iframe */}
-            {mapHtml ? (
-              <iframe
-                srcDoc={mapHtml}
-                title="AITU Map"
-                className="w-full h-[65vh] md:h-[70vh] rounded-xl overflow-hidden border-none"
-                style={{ border: 0, minHeight: '350px' }}
-                sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                allowFullScreen
-              />
-            ) : (
-              <iframe
-                src="https://yuujiso.github.io/aitumap"
-                title="AITU Map"
-                className="w-full h-[65vh] md:h-[70vh] rounded-xl overflow-hidden border-none"
-                style={{ border: 0, minHeight: '350px' }}
-                allowFullScreen
-              />
-            )}
+          <div className={`text-center text-xs mb-2 ${infoText}`}>Instantly find your classroom by clicking on them</div>
+          <div className={`rounded-2xl shadow-2xl px-0 py-0 flex flex-col items-center ${cardBg} ${cardBorder}`} style={{ minHeight: 'calc(70vh)', width: '100%', maxWidth: '420px', overflow: 'hidden' }}>
+            {/* Directly render the AITUMap React component, passing searchQuery as a prop */}
+            <div style={{ width: '100%', maxWidth: '420px', overflow: 'hidden' }}>
+              <AITUMap search={searchQuery} />
+            </div>
           </div>
           <div className={`text-center text-xs mt-2 ${infoText}`}>Powered by <a href="https://yuujiso.github.io/aitumap" target="_blank" rel="noopener noreferrer" className="underline">AITU Map</a></div>
         </div>

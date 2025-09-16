@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ScheduleService from "@/api/schedule";
 import Navbar from './components/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 type ScheduleItem = {
   time: string;
@@ -26,7 +27,7 @@ function App() {
   // Get theme from localStorage
   const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
   let pageBg = '', glow1 = '', glow2 = '';
-  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '', modalText = '', modalBadge = '';
+  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '';
   let practiceText = '', lectureText = '';
   if (theme === 'dark-blue') {
     pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
@@ -49,8 +50,7 @@ function App() {
     emptyCardText = 'text-blue-300';
     modalBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
     modalBorder = 'border-blue-900';
-    modalText = 'text-blue-200';
-    modalBadge = 'bg-gradient-to-r from-blue-500 to-purple-500 text-white';
+  // removed modalText
     practiceText = 'text-cyan-300';
     lectureText = 'text-purple-300';
   } else if (theme === 'white') {
@@ -74,8 +74,7 @@ function App() {
     emptyCardText = 'text-slate-400';
     modalBg = 'bg-white';
     modalBorder = 'border-slate-200';
-    modalText = 'text-slate-700';
-    modalBadge = 'bg-gradient-to-r from-slate-100 to-white text-slate-700';
+  // removed modalText
     practiceText = 'text-blue-500';
     lectureText = 'text-red-500';
   } else {
@@ -99,8 +98,7 @@ function App() {
     emptyCardText = 'text-red-200';
     modalBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
     modalBorder = 'border-red-900';
-    modalText = 'text-red-200';
-    modalBadge = 'bg-gradient-to-r from-red-700 to-pink-700 text-white';
+  // removed modalText
     practiceText = 'text-yellow-300';
     lectureText = 'text-pink-300';
   }
@@ -113,6 +111,7 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hiddenSubjects, setHiddenSubjects] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // ...existing code...
@@ -264,53 +263,105 @@ function App() {
 
         {/* Filter Modal */}
         {showFilter && (
-          <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className={`${modalBg} rounded-3xl border ${modalBorder} shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto`}>
-              <div className="flex items-center gap-2 mb-4">
-                <Badge className={`${modalBadge} px-3 py-1 text-base font-semibold shadow`}>Filter</Badge>
-                <span className={`text-base font-semibold ${modalText}`}>Hide subjects from schedule</span>
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFilter(false)} />
+            <div
+              className={`relative w-full max-w-md mx-auto rounded-3xl shadow-2xl border-0 px-0 py-0 overflow-hidden`}
+              style={{ background: theme === 'dark-blue' ? 'linear-gradient(135deg, #232A4D 80%, #181C3A 100%)' : theme === 'white' ? '#fff' : 'linear-gradient(135deg, #4D232A 80%, #3A181C 100%)' }}
+            >
+              <div className={`px-7 pt-7 pb-4 border-b ${theme === 'dark-blue' ? 'border-blue-900' : theme === 'white' ? 'border-slate-200' : 'border-red-900'}`}>
+                <h3 className={`text-xl font-bold ${theme === 'dark-blue' ? 'text-blue-200' : theme === 'white' ? 'text-slate-700' : 'text-red-200'}`}>Filter Subjects</h3>
               </div>
-              <div className="flex flex-wrap gap-3 justify-center">
-                {allSubjects.length === 0 ? (
-                  <span className={`${emptyCardText}`}>No subjects to filter.</span>
-                ) : (
-                  allSubjects.map(subjectKey => {
-                    if (subjectKey.includes('__')) {
-                      const [discipline, lector] = subjectKey.split('__');
-                      return (
-                        <Button
-                          key={subjectKey}
-                          type="button"
-                          variant={hiddenSubjects.includes(subjectKey) ? "secondary" : "outline"}
-                          className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subjectKey) ? `${tabsActiveBg} ${tabsActiveText} border-blue-400` : `${cardBorder} hover:border-purple-400 ${theme === 'dark-blue' ? 'hover:bg-blue-900/40' : theme === 'white' ? 'hover:bg-slate-200' : 'hover:bg-red-900/40'}`} hover:scale-105`}
-                          onClick={() => handleFilterChange(subjectKey)}
-                        >
-                          <span>{discipline}</span>
-                          <span className={`ml-2 text-xs ${emptyCardText}`}>{lector}</span>
-                        </Button>
-                      );
-                    } else {
-                      return (
-                        <Button
-                          key={subjectKey}
-                          type="button"
-                          variant={hiddenSubjects.includes(subjectKey) ? "secondary" : "outline"}
-                          className={`rounded-full px-5 py-2 text-sm font-semibold shadow transition-all duration-200 border-2 ${hiddenSubjects.includes(subjectKey) ? `${tabsActiveBg} ${tabsActiveText} border-blue-400` : `${cardBorder} hover:border-purple-400 ${theme === 'dark-blue' ? 'hover:bg-blue-900/40' : theme === 'white' ? 'hover:bg-slate-200' : 'hover:bg-red-900/40'}`} hover:scale-105`}
-                          onClick={() => handleFilterChange(subjectKey)}
-                        >
-                          {subjectKey}
-                        </Button>
-                      );
-                    }
-                  })
+              <div className="px-7 pt-4 pb-2">
+                {/* Select All / Unselect All Toggle Button */}
+                {allSubjects.length > 0 && (
+                  <Button
+                    type="button"
+                    variant={hiddenSubjects.length < allSubjects.length ? "destructive" : "outline"}
+                    className={`mb-4 w-full rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200
+                      ${hiddenSubjects.length < allSubjects.length
+                        ? theme === 'dark-blue'
+                          ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 hover:bg-red-600'
+                          : theme === 'white'
+                            ? 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
+                            : 'bg-gradient-to-r from-pink-700 to-red-700 text-white border-red-400 hover:bg-red-800'
+                        : theme === 'dark-blue'
+                          ? 'bg-gradient-to-r from-blue-900/80 to-indigo-900/80 text-blue-200 border-blue-800 hover:bg-blue-900/40'
+                          : theme === 'white'
+                            ? 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                            : 'bg-gradient-to-r from-red-900/80 to-pink-900/80 text-red-200 border-red-800 hover:bg-red-900/40'
+                      }`}
+                    onClick={() => {
+                      if (hiddenSubjects.length < allSubjects.length) {
+                        // Hide all subjects
+                        setHiddenSubjects([...allSubjects]);
+                        localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify([...allSubjects]));
+                      } else {
+                        // Show all subjects
+                        setHiddenSubjects([]);
+                        localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify([]));
+                      }
+                    }}
+                  >
+                    {hiddenSubjects.length < allSubjects.length ? 'Unselect All' : 'Select All'}
+                  </Button>
                 )}
+                <div className="max-h-[45vh] overflow-y-auto flex flex-col gap-2 pb-2">
+                  {allSubjects.length === 0 ? (
+                    <span className={theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}>No subjects to filter.</span>
+                  ) : (
+                    allSubjects.map(subjectKey => {
+                      const isHidden = hiddenSubjects.includes(subjectKey);
+                      const buttonBg = isHidden
+                        ? theme === 'dark-blue'
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400'
+                          : theme === 'white'
+                            ? 'bg-slate-200 text-slate-700 border-slate-400'
+                            : 'bg-gradient-to-r from-pink-700 to-red-700 text-white border-red-400'
+                        : theme === 'dark-blue'
+                          ? 'bg-indigo-900/40 text-blue-200 border-blue-900'
+                          : theme === 'white'
+                            ? 'bg-white text-slate-700 border-slate-200'
+                            : 'bg-red-900/40 text-red-200 border-red-900';
+                      if (subjectKey.includes('__')) {
+                        const [discipline, lector] = subjectKey.split('__');
+                        return (
+                          <Button
+                            key={subjectKey}
+                            type="button"
+                            variant="outline"
+                            className={`rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-100 hover:scale-105 ${buttonBg}`}
+                            onClick={() => handleFilterChange(subjectKey)}
+                          >
+                            <span>{discipline}</span>
+                            <span className={`ml-2 text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>{lector}</span>
+                          </Button>
+                        );
+                      } else {
+                        return (
+                          <Button
+                            key={subjectKey}
+                            type="button"
+                            variant="outline"
+                            className={`rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200 hover:scale-105 ${buttonBg}`}
+                            onClick={() => handleFilterChange(subjectKey)}
+                          >
+                            {subjectKey}
+                          </Button>
+                        );
+                      }
+                    })
+                  )}
+                </div>
+                <div className="w-full flex justify-end mt-2">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className={`rounded-xl px-5 py-2 font-semibold shadow ${theme === 'dark-blue' ? 'bg-indigo-900/40 text-blue-200 hover:bg-indigo-900/60' : theme === 'white' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-red-900/40 text-red-200 hover:bg-red-900/60'}`}
+                    onClick={() => setShowFilter(false)}
+                  >Close</Button>
+                </div>
               </div>
-              <div className={`text-xs ${emptyCardText} mt-4 text-center`}>Subjects you hide will not appear in your schedule for this group.</div>
-              <Button
-                variant="ghost"
-                className="mt-6 w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold shadow rounded-xl px-6 py-2"
-                onClick={() => setShowFilter(false)}
-              >Close</Button>
             </div>
           </div>
         )}
@@ -402,8 +453,8 @@ function App() {
                         </CardHeader>
                         <CardContent className="pt-5">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <div className={`flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-blue-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-red-900/40'}`}> 
-                              <div className={`flex items-center justify-center h-10 w-10 rounded-full mr-3 ${theme === 'dark-blue' ? 'bg-blue-700 text-white' : theme === 'white' ? 'bg-slate-200 text-slate-700' : 'bg-red-700 text-white'}`}> 
+                            <div className={`flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-indigo-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-pink-900/40'}`}> 
+                              <div className={`flex items-center justify-center h-10 w-10 rounded-full mr-3 ${theme === 'dark-blue' ? 'bg-indigo-700 text-white' : theme === 'white' ? 'bg-slate-200 text-slate-700' : 'bg-pink-700 text-white'}`}> 
                                 <Clock className="h-5 w-5" />
                               </div>
                               <div>
@@ -417,7 +468,17 @@ function App() {
                               </div>
                               <div>
                                 <p className={`text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>Location</p>
-                                <p className={`font-medium ${cardText}`}>{item.classroom}</p>
+                                {item.classroom == 'online' ? (
+                                  <p className={`font-medium ${cardText}`}>{item.classroom}</p>
+                                ) : (
+                                  <button
+                                    className={`font-medium underline ${cardText} cursor-pointer hover:text-blue-500 transition`}
+                                    style={{ background: 'none', border: 'none', padding: 0 }}
+                                    onClick={() => navigate(`/map?search=${encodeURIComponent(item.classroom)}`)}
+                                  >
+                                    {item.classroom}
+                                  </button>
+                                )}
                               </div>
                             </div>
                             <div className={`md:col-span-2 flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-purple-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-red-900/40'}`}> 
