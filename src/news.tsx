@@ -36,6 +36,7 @@ function parseICS(ics: string): CalendarEvent[] {
         event.description += line;
       }
     }
+    console.log(event);
     if (event.summary && event.start) {
       events.push(event as CalendarEvent);
     }
@@ -199,6 +200,7 @@ function AssignmentsPage() {
             <div className="grid gap-4">
               {events
                 .filter(ev => !ev.summary?.startsWith("Attendance "))
+                .filter(ev => timeRemaining(ev.end) != "Expired")
                 .sort((a, b) => {
                   const getTime = (dt: string) => {
                     if (!dt) return Infinity;
