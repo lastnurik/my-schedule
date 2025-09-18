@@ -150,22 +150,92 @@ function AssignmentsPage() {
   const [error, setError] = useState<string>("");
   const [expandedCards, setExpandedCards] = useState<Set<number>>(new Set());
 
-  useEffect(() => {
-    if (calendarUrl) {
-      setLoading(true);
-      setError("");
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(calendarUrl)}`;
-      fetch(proxyUrl)
-        .then((r) => r.text())
-        .then((ics) => {
-          setEvents(parseICS(ics));
-          setLoading(false);
-        })
-        .catch(() => {
-          setError("Failed to fetch calendar. Check the URL or try uploading the file manually.");
-          setLoading(false);
-        });
+  // --- Hidden assignments state (persisted in localStorage) ---
+  const [hiddenAssignments, setHiddenAssignments] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem("hiddenAssignments");
+      if (saved) return new Set(JSON.parse(saved));
+    } catch {}
+    return new Set();
+  });
+
+  // Helper to get unique assignment key
+  const getAssignmentKey = (ev: CalendarEvent, index: number) =>
+    `${ev.summary}-${ev.start}-${index}`;
+
+  // Handler to hide assignment
+  const hideAssignment = (ev: CalendarEvent, index: number) => {
+    setHiddenAssignments(prev => {
+      const updated = new Set(prev).add(getAssignmentKey(ev, index));
+      localStorage.setItem("hiddenAssignments", JSON.stringify(Array.from(updated)));
+      return updated;
+    });
+  };
+
+  // Handler to reset hidden assignments
+  const resetHiddenAssignments = () => {
+    setHiddenAssignments(() => {
+      localStorage.removeItem("hiddenAssignments");
+      return new Set();
+    });
+  };
+
+  // Fetch and update assignments, and save to localStorage
+  const fetchAssignments = () => {
+    if (!calendarUrl) return;
+    setLoading(true);
+    setError("");
+    if (!navigator.onLine) {
+      // Offline: load from cache
+      const cached = localStorage.getItem("assignmentsCache");
+      if (cached) {
+        try {
+          setEvents(JSON.parse(cached));
+        } catch {}
+      }
+      setLoading(false);
+      setError("You are offline. Showing cached assignments.");
+      return;
     }
+    // Online: fetch from remote
+    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(calendarUrl)}`;
+    fetch(proxyUrl)
+      .then((r) => r.text())
+      .then((ics) => {
+        const parsed = parseICS(ics);
+        setEvents(parsed);
+        localStorage.setItem("assignmentsCache", JSON.stringify(parsed));
+        setLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to fetch calendar. Check the URL or try uploading the file manually.");
+        setLoading(false);
+      });
+  };
+
+  // On mount, load assignments from cache if offline, otherwise fetch latest
+  useEffect(() => {
+    if (!calendarUrl) return;
+    if (!navigator.onLine) {
+      const cached = localStorage.getItem("assignmentsCache");
+      if (cached) {
+        try {
+          setEvents(JSON.parse(cached));
+        } catch {}
+      }
+      setError("You are offline. Showing cached assignments.");
+    } else {
+      fetchAssignments();
+    }
+    // Listen for page visibility change (refresh/tab switch)
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") fetchAssignments();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  // eslint-disable-next-line
   }, [calendarUrl]);
 
   const toggleCard = (index: number) => {
@@ -196,11 +266,34 @@ function AssignmentsPage() {
         </div>
         {events.length > 0 && (
           <div className="mb-8">
-            <h3 className={`text-lg font-semibold mb-2 ${calendarTitle}`}>Upcoming Assignments</h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className={`text-lg font-semibold ${calendarTitle}`}>Upcoming Assignments</h3>
+              {/* Reset hidden assignments button */}
+              {hiddenAssignments.size > 0 && (
+                <button
+                  className={`text-xs underline px-2 py-1 rounded transition font-semibold
+                    ${
+                      theme === 'dark-blue'
+                        ? 'bg-blue-900/40 text-blue-200 hover:bg-blue-900/60 border border-blue-800'
+                        : theme === 'white'
+                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                        : 'bg-red-900/40 text-red-200 hover:bg-red-900/60 border border-red-800'
+                    }
+                  `}
+                  onClick={resetHiddenAssignments}
+                  type="button"
+                  style={{}}
+                >
+                  Reset Hidden
+                </button>
+              )}
+            </div>
             <div className="grid gap-4">
               {events
                 .filter(ev => !ev.summary?.startsWith("Attendance "))
                 .filter(ev => timeRemaining(ev.end) != "Expired")
+                .map((ev, index) => ({ ev, index }))
+                .filter(({ ev, index }) => !hiddenAssignments.has(getAssignmentKey(ev, index)))
                 .sort((a, b) => {
                   const getTime = (dt: string) => {
                     if (!dt) return Infinity;
@@ -223,16 +316,16 @@ function AssignmentsPage() {
                       return Infinity;
                     }
                   };
-                  return getTime(a.start) - getTime(b.start);
+                  return getTime(a.ev.start) - getTime(b.ev.start);
                 })
-                .map((ev, index) => {
+                .map(({ ev, index }) => {
                   const course = ev.categories ? ev.categories.split("|")[0].trim() : "Assignment";
                   const assignment = ev.summary || "Assignment";
                   const info = formatDescription(ev.description) || "";
                   const isExpanded = expandedCards.has(index);
                   return (
                     <div
-                      key={`${ev.summary}-${ev.start}-${index}`}
+                      key={getAssignmentKey(ev, index)}
                       className={`${cardBg} rounded-2xl shadow-2xl p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 border ${cardBorder} ${cardText} ${isExpanded ? (theme === 'dark-blue' ? 'ring-2 ring-blue-400' : theme === 'white' ? 'ring-2 ring-slate-400' : 'ring-2 ring-red-400') : ''}`}
                       onClick={() => toggleCard(index)}
                     >
@@ -244,8 +337,18 @@ function AssignmentsPage() {
                       <div className={`text-sm overflow-hidden ${infoText} ${isExpanded ? '' : 'line-clamp-2'}`}>{info}</div>
                       <div className="flex justify-between items-center text-xs mt-2">
                         <span className={`font-bold ${timeText} text-bg`}>⏳ Time left: {timeRemaining(ev.start)}</span>
-                        <div className="flex items-center">
-                          {ev.location && <span className={`${locationText} mr-2`}>{ev.location}</span>}
+                        <div className="flex items-center gap-2">
+                          {ev.location && <span className={`${locationText}`}>{ev.location}</span>}
+                          {/* Hide button */}
+                          <button
+                            className="text-xs underline px-1 py-0.5 rounded hover:bg-opacity-30 transition"
+                            style={{ color: 'var(--info-text)' }}
+                            onClick={e => { e.stopPropagation(); hideAssignment(ev, index); }}
+                            type="button"
+                            title="Hide this assignment"
+                          >
+                            Hide
+                          </button>
                           {isExpanded ? (
                             <ChevronUp className={`h-4 w-4 ${locationText}`} />
                           ) : (
