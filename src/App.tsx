@@ -151,24 +151,20 @@ function App() {
   };
 
   const handleFetchSchedule = async () => {
-    if (!navigator.onLine) {
-      const service = new ScheduleService();
-      const local = service.getLocalSchedule(group);
-      setScheduleData((local || {}) as ScheduleData);
-      setError("You are offline. Showing stored schedule.");
-      return;
-    }
     setLoading(true);
     setError(null);
+    const service = new ScheduleService();
     try {
-      const service = new ScheduleService();
       const data = await service.fetchSchedule(group);
       setScheduleData(data as ScheduleData);
       service.storeScheduleLocally(group, data);
       localStorage.setItem('lastGroup', group);
       setShowForm(false);
     } catch (e: any) {
-      setError(e.message || 'Failed to fetch schedule');
+      // If fetch fails, try to load from local storage
+      const local = service.getLocalSchedule(group);
+      setScheduleData((local || {}) as ScheduleData);
+      setError((e.message ? e.message + '. ' : '') + 'Showing stored schedule if available.');
     } finally {
       setLoading(false);
     }
