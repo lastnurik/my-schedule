@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -306,7 +306,7 @@ const GroupModal = ({ showForm, setShowForm, groupPrefix, setGroupPrefix, groupN
   )
 );
 
-const ScheduleCard = ({ item, languageSubjects, navigate }: any) => (
+const ScheduleCard = ({ item, navigate }: any) => (
   <Card
     key={item.time + item.discipline + item.classroom}
     className="overflow-hidden border-2 shadow-2xl transition-all duration-300 backdrop-blur-xl rounded-3xl px-6 py-5"
