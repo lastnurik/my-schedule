@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import ScheduleService from "@/api/schedule";
 import Navbar from './components/Navbar';
 import { useNavigate } from 'react-router-dom';
+import { useThemeClass } from './useThemeClass';
 
 type ScheduleItem = {
   time: string;
@@ -24,85 +25,8 @@ type ScheduleData = {
 
 
 function App() {
-  // Get theme from localStorage
-  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
-  let pageBg = '', glow1 = '', glow2 = '';
-  let cardBg = '', cardText = '', cardBorder = '', badgeLecture = '', badgePractice = '', inputBg = '', inputText = '', inputPlaceholder = '', tabsBg = '', tabsText = '', tabsActiveBg = '', tabsActiveText = '', emptyCardBg = '', emptyCardBorder = '', emptyCardText = '', modalBg = '', modalBorder = '';
-  let practiceText = '', lectureText = '';
-  if (theme === 'dark-blue') {
-    pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
-    glow1 = 'bg-gradient-to-br from-blue-700/40 via-indigo-600/30 to-purple-700/20';
-    glow2 = 'bg-gradient-to-tr from-purple-600/30 via-blue-500/20 to-indigo-700/10';
-    cardBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
-    cardText = 'text-white';
-    cardBorder = 'border-blue-900';
-    badgeLecture = 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white';
-    badgePractice = 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white';
-    inputBg = 'bg-[#232A4D]';
-    inputText = 'text-white';
-    inputPlaceholder = 'placeholder:text-blue-300';
-    tabsBg = 'bg-gradient-to-r from-blue-900/80 to-indigo-900/80 border-blue-800';
-    tabsText = 'text-blue-200';
-    tabsActiveBg = 'bg-gradient-to-r from-blue-500 to-indigo-500';
-    tabsActiveText = 'text-white';
-    emptyCardBg = 'bg-blue-900/30';
-    emptyCardBorder = 'border-blue-900';
-    emptyCardText = 'text-blue-300';
-    modalBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
-    modalBorder = 'border-blue-900';
-  // removed modalText
-    practiceText = 'text-cyan-300';
-    lectureText = 'text-purple-300';
-  } else if (theme === 'white') {
-    pageBg = 'bg-white';
-    glow1 = 'bg-white';
-    glow2 = 'bg-white';
-    cardBg = 'bg-white';
-    cardText = 'text-slate-700';
-    cardBorder = 'border-slate-200';
-    badgeLecture = 'bg-gradient-to-r from-slate-100 to-white text-slate-700';
-    badgePractice = 'bg-gradient-to-r from-emerald-200 to-teal-200 text-slate-700';
-    inputBg = 'bg-white';
-    inputText = 'text-slate-700';
-    inputPlaceholder = 'placeholder:text-slate-400';
-    tabsBg = 'bg-slate-100 border-slate-200';
-    tabsText = 'text-slate-700';
-    tabsActiveBg = 'bg-gradient-to-r from-slate-100 to-white';
-    tabsActiveText = 'text-slate-700';
-    emptyCardBg = 'bg-slate-100';
-    emptyCardBorder = 'border-slate-200';
-    emptyCardText = 'text-slate-400';
-    modalBg = 'bg-white';
-    modalBorder = 'border-slate-200';
-  // removed modalText
-    practiceText = 'text-blue-500';
-    lectureText = 'text-red-500';
-  } else {
-    pageBg = 'bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]';
-    glow1 = 'bg-gradient-to-br from-red-700/40 via-pink-700/30 to-red-900/20';
-    glow2 = 'bg-gradient-to-tr from-pink-600/30 via-red-500/20 to-red-900/10';
-    cardBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
-    cardText = 'text-red-200';
-    cardBorder = 'border-red-900';
-    badgeLecture = 'bg-gradient-to-r from-red-700 to-pink-700 text-white';
-    badgePractice = 'bg-gradient-to-r from-rose-700 to-pink-700 text-white';
-    inputBg = 'bg-[#4D232A]';
-    inputText = 'text-red-200';
-    inputPlaceholder = 'placeholder:text-red-200';
-    tabsBg = 'bg-gradient-to-r from-red-900/80 to-pink-900/80 border-red-800';
-    tabsText = 'text-red-200';
-    tabsActiveBg = 'bg-gradient-to-r from-red-700 to-pink-700';
-    tabsActiveText = 'text-white';
-    emptyCardBg = 'bg-red-900/30';
-    emptyCardBorder = 'border-red-900';
-    emptyCardText = 'text-red-200';
-    modalBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
-    modalBorder = 'border-red-900';
-  // removed modalText
-    practiceText = 'text-yellow-300';
-    lectureText = 'text-pink-300';
-  }
-  // ...existing logic...
+  useThemeClass();
+
   const [scheduleData, setScheduleData] = useState<ScheduleData>({});
   const [selectedDay, setSelectedDay] = useState<string>('Monday');
   const [group, setGroup] = useState<string>('');
@@ -137,7 +61,6 @@ function App() {
 
   // When loading from localStorage, parse group into fields
   useEffect(() => {
-    // ...existing code...
     const lastGroup = localStorage.getItem('lastGroup');
     if (lastGroup) {
       // Parse group into prefix, number, suffix
@@ -159,7 +82,6 @@ function App() {
   }, []);
 
   const fetchLocalSchedule = (groupName: string) => {
-    // ...existing code...
     const service = new ScheduleService();
     const local = service.getLocalSchedule(groupName);
     if (local) {
@@ -173,7 +95,6 @@ function App() {
   };
 
   const languageSubjects = [
-    // ...existing code...
     'Foreign language',
     'Kazakh language',
     'Russian language',
@@ -189,6 +110,7 @@ function App() {
     'Немецкий язык',
     'Китайский язык',
   ];
+  // For filtering, keep discipline+lector for language subjects, but for count, use only unique disciplines
   const allSubjects = Array.from(
     new Set(
       Object.values(scheduleData)
@@ -201,8 +123,23 @@ function App() {
     )
   );
 
+  // For display count, use only unique discipline names that are not hidden
+  const visibleDisciplines = Array.from(
+    new Set(
+      Object.values(scheduleData)
+        .flat()
+        .filter(item => {
+          // Determine the subjectKey used in hiddenSubjects
+          const subjectKey = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+            ? `${item.discipline}__${item.lector}`
+            : item.discipline;
+          return !hiddenSubjects.includes(subjectKey);
+        })
+        .map(item => item.discipline)
+    )
+  );
+
   const handleFilterChange = (subjectKey: string) => {
-    // ...existing code...
     let updated: string[];
     if (hiddenSubjects.includes(subjectKey)) {
       updated = hiddenSubjects.filter(s => s !== subjectKey);
@@ -214,7 +151,6 @@ function App() {
   };
 
   const handleFetchSchedule = async () => {
-    // ...existing code...
     if (!navigator.onLine) {
       const service = new ScheduleService();
       const local = service.getLocalSchedule(group);
@@ -242,50 +178,88 @@ function App() {
 
   // --- UI Redesign ---
   return (
-  <div className={`min-h-screen w-full ${pageBg} pb-24 pt-8 px-2 md:px-0 relative`}>
+  <div
+    className={
+      "min-h-screen w-full pb-24 pt-8 px-2 md:px-0 relative " +
+      (document.documentElement.classList.contains('theme-dark-blue')
+        ? "bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]"
+        : document.documentElement.classList.contains('theme-dark-red')
+        ? "bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]"
+        : "bg-white")
+    }
+  >
       {/* Glowing background effect */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vw] ${glow1} rounded-full blur-3xl opacity-70`} />
-        <div className={`absolute bottom-0 right-0 w-[40vw] h-[30vw] ${glow2} rounded-full blur-2xl opacity-60`} />
+        <div className={
+          "absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vw] rounded-full blur-3xl opacity-70 " +
+          (document.documentElement.classList.contains('theme-dark-blue')
+            ? "bg-gradient-to-br from-blue-700/40 via-indigo-600/30 to-purple-700/20"
+            : document.documentElement.classList.contains('theme-dark-red')
+            ? "bg-gradient-to-br from-red-700/40 via-pink-700/30 to-red-900/20"
+            : "bg-white")
+        } />
+        <div className={
+          "absolute bottom-0 right-0 w-[40vw] h-[30vw] rounded-full blur-2xl opacity-60 " +
+          (document.documentElement.classList.contains('theme-dark-blue')
+            ? "bg-gradient-to-tr from-purple-600/30 via-blue-500/20 to-indigo-700/10"
+            : document.documentElement.classList.contains('theme-dark-red')
+            ? "bg-gradient-to-tr from-pink-600/30 via-red-500/20 to-red-900/10"
+            : "bg-white")
+        } />
       </div>
 
       <div className="relative z-10 max-w-md mx-auto">
         {/* Header Card */}
-  <Card className={`mb-6 ${cardBg} border-2 ${cardBorder} shadow-2xl rounded-3xl px-6 py-7 ${cardText}`}>
+        <Card className="mb-6 border-2 shadow-2xl rounded-3xl px-6 py-7"
+          style={{
+            background: 'var(--card-bg)',
+            color: 'var(--card-text)',
+            borderColor: 'var(--card-border)'
+          }}
+        >
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div className="flex items-center gap-3">
-              <div className={`${badgeLecture} rounded-full p-3 shadow-lg`}>
+              <div className="rounded-full p-3 shadow-lg"
+                style={{ background: 'var(--badge-lecture)', color: 'var(--card-text)' }}>
                 <Calendar className="h-7 w-7" />
               </div>
               <CardTitle className="text-2xl font-bold tracking-tight">Schedule</CardTitle>
             </div>
-            <div className={`rounded-full ${theme === 'dark-blue' ? 'bg-gradient-to-br from-indigo-500 to-purple-600 border-2 border-blue-400' : theme === 'white' ? 'bg-slate-200 border-2 border-slate-400' : 'bg-gradient-to-br from-pink-700 to-red-700 border-2 border-red-400'} shadow-lg`}>
+            <div className="rounded-full shadow-lg"
+              style={{
+                background: 'var(--badge-lecture)',
+                border: '2px solid var(--card-border)'
+              }}>
               <img src="/icon/apple-touch-icon.png" alt="User" className="h-8 w-8 rounded-full" />
             </div>
           </CardHeader>
           <CardContent className="pt-2">
             <div className="flex flex-col gap-2">
-              <div className={`flex items-center justify-between ${tabsBg} rounded-xl px-3 py-2 shadow-inner`}>
+              <div className="flex items-center justify-between rounded-xl px-3 py-2 shadow-inner"
+                style={{ background: 'var(--tabs-bg)' }}>
                 <div>
-                  <div className={`text-xs ${tabsText}`}>Current Group</div>
-                  <div className={`text-base font-semibold ${cardText}`}>{group || 'No group selected'}</div>
+                  <div className="text-xs" style={{ color: 'var(--tabs-text)' }}>Current Group</div>
+                  <div className="text-base font-semibold" style={{ color: 'var(--card-text)' }}>{group || 'No group selected'}</div>
                 </div>
                 <Button
                   variant="ghost"
-                  className={`${badgeLecture} font-semibold shadow-md rounded-lg px-3 py-1 text-sm`}
+                  className="font-semibold shadow-md rounded-lg px-3 py-1 text-sm"
+                  style={{ background: 'var(--badge-lecture)', color: 'var(--card-text)' }}
                   onClick={() => setShowForm(v => !v)}
                 >
                   {showForm ? 'Hide' : 'Update'}
                 </Button>
               </div>
-              <div className={`flex items-center justify-between ${theme === 'dark-blue' ? 'bg-gradient-to-r from-indigo-700/80 to-purple-700/80' : theme === 'white' ? 'bg-slate-100' : 'bg-gradient-to-r from-pink-900/80 to-red-900/80'} rounded-xl px-3 py-2 shadow-inner mt-2`}>
+              <div className="flex items-center justify-between rounded-xl px-3 py-2 shadow-inner mt-2"
+                style={{ background: 'var(--tabs-bg)' }}>
                 <div>
-                  <div className={`text-xs ${theme === 'dark-blue' ? 'text-purple-200' : theme === 'white' ? 'text-slate-400' : 'text-pink-200'}`}>Filters</div>
-                  <div className={`text-base font-semibold ${cardText}`}>{allSubjects.length} subjects</div>
+                  <div className="text-xs" style={{ color: 'var(--tabs-text)' }}>Filters</div>
+                  <div className="text-base font-semibold" style={{ color: 'var(--card-text)' }}>{visibleDisciplines.length} subjects</div>
                 </div>
                 <Button
                   variant="ghost"
-                  className={`${badgeLecture} font-semibold shadow-md rounded-lg px-3 py-1 text-sm`}
+                  className="font-semibold shadow-md rounded-lg px-3 py-1 text-sm"
+                  style={{ background: 'var(--badge-lecture)', color: 'var(--card-text)' }}
                   onClick={() => setShowFilter(v => !v)}
                 >
                   {showFilter ? 'Hide' : 'Show'}
@@ -300,11 +274,11 @@ function App() {
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowFilter(false)} />
             <div
-              className={`relative w-full max-w-md mx-auto rounded-3xl shadow-2xl border-0 px-0 py-0 overflow-hidden`}
-              style={{ background: theme === 'dark-blue' ? 'linear-gradient(135deg, #232A4D 80%, #181C3A 100%)' : theme === 'white' ? '#fff' : 'linear-gradient(135deg, #4D232A 80%, #3A181C 100%)' }}
+              className="relative w-full max-w-md mx-auto rounded-3xl shadow-2xl border-0 px-0 py-0 overflow-hidden"
+              style={{ background: 'var(--modal-bg)' }}
             >
-              <div className={`px-7 pt-7 pb-4 border-b ${theme === 'dark-blue' ? 'border-blue-900' : theme === 'white' ? 'border-slate-200' : 'border-red-900'}`}>
-                <h3 className={`text-xl font-bold ${theme === 'dark-blue' ? 'text-blue-200' : theme === 'white' ? 'text-slate-700' : 'text-red-200'}`}>Filter Subjects</h3>
+              <div className="px-7 pt-7 pb-4 border-b" style={{ borderColor: 'var(--modal-border)' }}>
+                <h3 className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>Filter Subjects</h3>
               </div>
               <div className="px-7 pt-4 pb-2">
                 {/* Select All / Unselect All Toggle Button */}
@@ -312,26 +286,17 @@ function App() {
                   <Button
                     type="button"
                     variant={hiddenSubjects.length < allSubjects.length ? "destructive" : "outline"}
-                    className={`mb-4 w-full rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200
-                      ${hiddenSubjects.length < allSubjects.length
-                        ? theme === 'dark-blue'
-                          ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white border-red-400 hover:bg-red-600'
-                          : theme === 'white'
-                            ? 'bg-red-100 text-red-700 border-red-300 hover:bg-red-200'
-                            : 'bg-gradient-to-r from-pink-700 to-red-700 text-white border-red-400 hover:bg-red-800'
-                        : theme === 'dark-blue'
-                          ? 'bg-gradient-to-r from-blue-900/80 to-indigo-900/80 text-blue-200 border-blue-800 hover:bg-blue-900/40'
-                          : theme === 'white'
-                            ? 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
-                            : 'bg-gradient-to-r from-red-900/80 to-pink-900/80 text-red-200 border-red-800 hover:bg-red-900/40'
-                      }`}
+                    className="mb-4 w-full rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200"
+                    style={{
+                      background: hiddenSubjects.length < allSubjects.length ? 'var(--fetch-btn)' : 'var(--tabs-bg)',
+                      color: hiddenSubjects.length < allSubjects.length ? '#fff' : 'var(--tabs-text)',
+                      borderColor: hiddenSubjects.length < allSubjects.length ? 'var(--card-border)' : 'var(--tabs-bg)'
+                    }}
                     onClick={() => {
                       if (hiddenSubjects.length < allSubjects.length) {
-                        // Hide all subjects
                         setHiddenSubjects([...allSubjects]);
                         localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify([...allSubjects]));
                       } else {
-                        // Show all subjects
                         setHiddenSubjects([]);
                         localStorage.setItem(`hiddenSubjects_${group}`, JSON.stringify([]));
                       }
@@ -342,21 +307,21 @@ function App() {
                 )}
                 <div className="max-h-[45vh] overflow-y-auto flex flex-col gap-2 pb-2">
                   {allSubjects.length === 0 ? (
-                    <span className={theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}>No subjects to filter.</span>
+                    <span style={{ color: 'var(--empty-card-text)' }}>No subjects to filter.</span>
                   ) : (
                     allSubjects.map(subjectKey => {
                       const isHidden = hiddenSubjects.includes(subjectKey);
-                      const buttonBg = isHidden
-                        ? theme === 'dark-blue'
-                          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400'
-                          : theme === 'white'
-                            ? 'bg-slate-200 text-slate-700 border-slate-400'
-                            : 'bg-gradient-to-r from-pink-700 to-red-700 text-white border-red-400'
-                        : theme === 'dark-blue'
-                          ? 'bg-indigo-900/40 text-blue-200 border-blue-900'
-                          : theme === 'white'
-                            ? 'bg-white text-slate-700 border-slate-200'
-                            : 'bg-red-900/40 text-red-200 border-red-900';
+                      const buttonStyle = isHidden
+                        ? {
+                            background: 'var(--badge-lecture)',
+                            color: '#fff',
+                            borderColor: 'var(--card-border)'
+                          }
+                        : {
+                            background: 'var(--tabs-bg)',
+                            color: 'var(--tabs-text)',
+                            borderColor: 'var(--tabs-bg)'
+                          };
                       if (subjectKey.includes('__')) {
                         const [discipline, lector] = subjectKey.split('__');
                         return (
@@ -364,11 +329,12 @@ function App() {
                             key={subjectKey}
                             type="button"
                             variant="outline"
-                            className={`rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-100 hover:scale-105 ${buttonBg}`}
+                            className="rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-100 hover:scale-105"
+                            style={buttonStyle}
                             onClick={() => handleFilterChange(subjectKey)}
                           >
                             <span>{discipline}</span>
-                            <span className={`ml-2 text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>{lector}</span>
+                            <span className="ml-2 text-xs" style={{ color: 'var(--empty-card-text)' }}>{lector}</span>
                           </Button>
                         );
                       } else {
@@ -377,7 +343,8 @@ function App() {
                             key={subjectKey}
                             type="button"
                             variant="outline"
-                            className={`rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200 hover:scale-105 ${buttonBg}`}
+                            className="rounded-full px-5 py-2 text-sm font-semibold shadow border-2 transition-all duration-200 hover:scale-105"
+                            style={buttonStyle}
                             onClick={() => handleFilterChange(subjectKey)}
                           >
                             {subjectKey}
@@ -391,7 +358,8 @@ function App() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className={`rounded-xl px-5 py-2 font-semibold shadow ${theme === 'dark-blue' ? 'bg-indigo-900/40 text-blue-200 hover:bg-indigo-900/60' : theme === 'white' ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' : 'bg-red-900/40 text-red-200 hover:bg-red-900/60'}`}
+                    className="rounded-xl px-5 py-2 font-semibold shadow"
+                    style={{ background: 'var(--tabs-bg)', color: 'var(--tabs-text)' }}
                     onClick={() => setShowFilter(false)}
                   >Close</Button>
                 </div>
@@ -408,7 +376,8 @@ function App() {
                 e.preventDefault();
                 handleFetchSchedule();
               }}
-              className={`flex flex-col gap-4 ${modalBg} rounded-3xl border ${modalBorder} shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto`}
+              className="flex flex-col gap-4 rounded-3xl border shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto"
+              style={{ background: 'var(--modal-bg)', borderColor: 'var(--modal-border)' }}
             >
               <label className="flex flex-col gap-1">
                 <div className="flex gap-2 items-center">
@@ -424,9 +393,14 @@ function App() {
                     }}
                     maxLength={5}
                     required
-                    className={`w-20 text-base md:text-lg px-4 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                    className="w-20 text-base md:text-lg px-4 py-3 rounded-lg border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
+                    style={{
+                      borderColor: 'var(--card-border)',
+                      background: 'var(--input-bg)',
+                      color: 'var(--input-text)'
+                    }}
                   />
-                  <span className={`font-bold text-lg ${cardText}`}>-</span>
+                  <span className="font-bold text-lg" style={{ color: 'var(--card-text)' }}>-</span>
                   {/* Number input */}
                   <Input
                     type="text"
@@ -438,7 +412,12 @@ function App() {
                     }}
                     maxLength={4}
                     required
-                    className={`w-20 text-base md:text-lg px-4 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                    className="w-20 text-base md:text-lg px-4 py-3 rounded-lg border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
+                    style={{
+                      borderColor: 'var(--card-border)',
+                      background: 'var(--input-bg)',
+                      color: 'var(--input-text)'
+                    }}
                   />
                   {/* Suffix input (optional, only 'M' allowed) */}
                   <Input
@@ -450,24 +429,31 @@ function App() {
                       setGroupSuffix(val);
                     }}
                     maxLength={1}
-                    className={`w-10 text-base md:text-lg px-2 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                    className="w-10 text-base md:text-lg px-2 py-3 rounded-lg border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400"
+                    style={{
+                      borderColor: 'var(--card-border)',
+                      background: 'var(--input-bg)',
+                      color: 'var(--input-text)'
+                    }}
                   />
                 </div>
-                <span className={`text-xs ${emptyCardText} pl-1`}>
-                  e.g. <span className={`font-mono ${cardText}`}>SE-2417</span> or <span className={`font-mono ${cardText}`}>CSE-2406M</span> or <span className={`font-mono ${cardText}`}>IoT-2401</span>
+                <span className="text-xs pl-1" style={{ color: 'var(--empty-card-text)' }}>
+                  e.g. <span className="font-mono" style={{ color: 'var(--card-text)' }}>SE-2417</span> or <span className="font-mono" style={{ color: 'var(--card-text)' }}>CSE-2406M</span> or <span className="font-mono" style={{ color: 'var(--card-text)' }}>IoT-2401</span>
                 </span>
               </label>
               <Button
                 type="submit"
                 disabled={loading || !groupPrefix || !groupNumber}
-                className={`${badgeLecture} font-semibold shadow-md rounded-xl px-6 py-2 w-full`}
+                className="font-semibold shadow-md rounded-xl px-6 py-2 w-full"
+                style={{ background: 'var(--badge-lecture)', color: 'var(--card-text)' }}
               >
                 {loading ? 'Fetching...' : 'Fetch Schedule'}
               </Button>
-              {error && <p className={`text-red-400 text-sm text-center mt-2`}>{error}</p>}
+              {error && <p className="text-red-400 text-sm text-center mt-2">{error}</p>}
               <Button
                 variant="ghost"
-                className={`mt-2 w-full ${badgeLecture} font-semibold shadow rounded-xl px-6 py-2`}
+                className="mt-2 w-full font-semibold shadow rounded-xl px-6 py-2"
+                style={{ background: 'var(--badge-lecture)', color: 'var(--card-text)' }}
                 onClick={() => setShowForm(false)}
               >Close</Button>
             </form>
@@ -475,14 +461,19 @@ function App() {
         )}
 
         {/* Tabs for days */}
-  <Tabs defaultValue="Monday" value={selectedDay} onValueChange={setSelectedDay} className="w-full mt-2">
+        <Tabs defaultValue="Monday" value={selectedDay} onValueChange={setSelectedDay} className="w-full mt-2">
           <div className="overflow-x-auto pb-2 mb-6">
-            <TabsList className={`grid w-full grid-cols-6 h-auto p-1 rounded-2xl border shadow-lg ${tabsBg}`}>
+            <TabsList className="grid w-full grid-cols-6 h-auto p-1 rounded-2xl border shadow-lg"
+              style={{ background: 'var(--tabs-bg)', borderColor: 'var(--card-border)' }}>
               {daysOfWeek.map(day => (
                 <TabsTrigger 
                   key={day} 
                   value={day}
-                  className={`rounded-xl py-3 text-sm font-medium transition-all duration-200 ${tabsText} data-[state=active]:${tabsActiveBg} data-[state=active]:${tabsActiveText}`}
+                  className="rounded-xl py-3 text-sm font-medium transition-all duration-200"
+                  style={{
+                    color: selectedDay === day ? 'var(--tabs-active-text)' : 'var(--tabs-text)',
+                    background: selectedDay === day ? 'var(--tabs-active-bg)' : 'transparent'
+                  }}
                 >
                   {day.slice(0, 3)}
                 </TabsTrigger>
@@ -509,13 +500,22 @@ function App() {
                     .map((item) => (
                       <Card 
                         key={item.time + item.discipline + item.classroom} 
-                        className={`overflow-hidden border-2 ${cardBorder} shadow-2xl transition-all duration-300 ${cardBg} backdrop-blur-xl rounded-3xl ${cardText} px-6 py-5`}
+                        className="overflow-hidden border-2 shadow-2xl transition-all duration-300 backdrop-blur-xl rounded-3xl px-6 py-5"
+                        style={{
+                          background: 'var(--card-bg)',
+                          color: 'var(--card-text)',
+                          borderColor: 'var(--card-border)'
+                        }}
                       >
-                        <CardHeader className={`pb-3 border-b ${cardBorder}`}>
+                        <CardHeader className="pb-3 border-b" style={{ borderColor: 'var(--card-border)' }}>
                           <div className="flex flex-row justify-between items-center gap-2">
-                            <CardTitle className={`text-xl font-bold ${cardText}`}>{item.discipline}</CardTitle>
+                            <CardTitle className="text-xl font-bold" style={{ color: 'var(--card-text)' }}>{item.discipline}</CardTitle>
                             <Badge 
-                              className={`text-sm font-semibold px-3 py-1 rounded-full shadow ${item.type === 'lecture' ? badgeLecture + ' ' + lectureText : badgePractice + ' ' + practiceText}`}
+                              className="text-sm font-semibold px-3 py-1 rounded-full shadow"
+                              style={{
+                                background: item.type === 'lecture' ? 'var(--badge-lecture)' : 'var(--badge-practice)',
+                                color: item.type === 'lecture' ? 'var(--lecture-text)' : 'var(--practice-text)'
+                              }}
                             >
                               {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
                             </Badge>
@@ -523,27 +523,43 @@ function App() {
                         </CardHeader>
                         <CardContent className="pt-5">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                            <div className={`flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-indigo-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-pink-900/40'}`}> 
-                              <div className={`flex items-center justify-center h-10 w-10 rounded-full mr-3 ${theme === 'dark-blue' ? 'bg-indigo-700 text-white' : theme === 'white' ? 'bg-slate-200 text-slate-700' : 'bg-pink-700 text-white'}`}> 
+                            <div className="flex items-center p-3 rounded-xl"
+                              style={{
+                                color: 'var(--tabs-text)',
+                                background: 'var(--tabs-bg)'
+                              }}>
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full mr-3"
+                                style={{
+                                  background: 'var(--badge-lecture)',
+                                  color: 'var(--icon-text)'
+                                }}>
                                 <Clock className="h-5 w-5" />
                               </div>
                               <div>
-                                <p className={`text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>Time</p>
-                                <p className={`font-medium ${cardText}`}>{item.time}</p>
+                                <p className="text-xs" style={{ color: 'var(--empty-card-text)' }}>Time</p>
+                                <p className="font-medium" style={{ color: 'var(--card-text)' }}>{item.time}</p>
                               </div>
                             </div>
-                            <div className={`flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-indigo-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-pink-900/40'}`}> 
-                              <div className={`flex items-center justify-center h-10 w-10 rounded-full mr-3 ${theme === 'dark-blue' ? 'bg-indigo-700 text-white' : theme === 'white' ? 'bg-slate-200 text-slate-700' : 'bg-pink-700 text-white'}`}> 
+                            <div className="flex items-center p-3 rounded-xl"
+                              style={{
+                                color: 'var(--tabs-text)',
+                                background: 'var(--tabs-bg)'
+                              }}>
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full mr-3"
+                                style={{
+                                  background: 'var(--badge-lecture)',
+                                  color: 'var(--icon-text)'
+                                }}>
                                 <MapPin className="h-5 w-5" />
                               </div>
                               <div>
-                                <p className={`text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>Location</p>
+                                <p className="text-xs" style={{ color: 'var(--empty-card-text)' }}>Location</p>
                                 {item.classroom == 'online' ? (
-                                  <p className={`font-medium ${cardText}`}>{item.classroom}</p>
+                                  <p className="font-medium" style={{ color: 'var(--card-text)' }}>{item.classroom}</p>
                                 ) : (
                                   <button
-                                    className={`font-medium underline ${cardText} cursor-pointer hover:text-blue-500 transition`}
-                                    style={{ background: 'none', border: 'none', padding: 0 }}
+                                    className="font-medium underline cursor-pointer hover:text-blue-500 transition"
+                                    style={{ background: 'none', border: 'none', padding: 0, color: 'var(--card-text)' }}
                                     onClick={() => navigate(`/map?search=${encodeURIComponent(item.classroom)}`)}
                                   >
                                     {item.classroom}
@@ -551,22 +567,35 @@ function App() {
                                 )}
                               </div>
                             </div>
-                            <div className={`md:col-span-2 flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-purple-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-red-900/40'}`}> 
-                              <div className={`flex items-center justify-center h-10 w-10 rounded-full mr-3 ${theme === 'dark-blue' ? 'bg-purple-700 text-white' : theme === 'white' ? 'bg-slate-200 text-slate-700' : 'bg-red-700 text-white'}`}> 
+                            <div className="md:col-span-2 flex items-center p-3 rounded-xl"
+                              style={{
+                                color: 'var(--tabs-text)',
+                                background: 'var(--tabs-bg)'
+                              }}>
+                              <div className="flex items-center justify-center h-10 w-10 rounded-full mr-3"
+                                style={{
+                                  background: 'var(--badge-lecture)',
+                                  color: 'var(--icon-text)'
+                                }}>
                                 <User className="h-5 w-5" />
                               </div>
                               <div className="truncate">
-                                <p className={`text-xs ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}>Instructor</p>
-                                <p className={`font-medium truncate ${cardText}`}>{item.lector}</p>
+                                <p className="text-xs" style={{ color: 'var(--empty-card-text)' }}>Instructor</p>
+                                <p className="font-medium truncate" style={{ color: 'var(--card-text)' }}>{item.lector}</p>
                               </div>
                             </div>
                             {item.teamsMeetingUrl && (
-                              <div className={`md:col-span-2 flex items-center p-3 rounded-xl ${theme === 'dark-blue' ? 'text-blue-200 bg-blue-900/40' : theme === 'white' ? 'text-slate-700 bg-slate-100' : 'text-red-200 bg-red-900/40'}`}> 
+                              <div className="md:col-span-2 flex items-center p-3 rounded-xl"
+                                style={{
+                                  color: 'var(--tabs-text)',
+                                  background: 'var(--tabs-bg)'
+                                }}>
                                 <a
                                   href={item.teamsMeetingUrl}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`underline font-medium truncate ${theme === 'dark-blue' ? 'text-blue-300' : theme === 'white' ? 'text-slate-400' : 'text-red-200'}`}
+                                  className="underline font-medium truncate"
+                                  style={{ color: 'var(--empty-card-text)' }}
                                 >
                                   Join Teams Meeting
                                 </a>
@@ -577,14 +606,19 @@ function App() {
                       </Card>
                     ))
                 ) : (
-                  <Card className={`text-center py-12 border-dashed border-2 rounded-3xl ${emptyCardBorder} ${emptyCardBg}`}>
+                  <Card className="text-center py-12 border-dashed border-2 rounded-3xl"
+                    style={{
+                      borderColor: 'var(--empty-card-border)',
+                      background: 'var(--empty-card-bg)'
+                    }}>
                     <CardContent>
                       <div className="flex flex-col items-center">
-                        <div className={`h-16 w-16 rounded-full flex items-center justify-center mb-4 ${theme === 'dark-blue' ? 'bg-blue-900' : theme === 'white' ? 'bg-slate-200' : 'bg-red-900'}`}> 
-                          <Calendar className={`h-8 w-8 ${emptyCardText}`} />
+                        <div className="h-16 w-16 rounded-full flex items-center justify-center mb-4"
+                          style={{ background: 'var(--empty-card-border)' }}>
+                          <Calendar className="h-8 w-8" style={{ color: 'var(--empty-card-text)' }} />
                         </div>
-                        <h3 className={`text-lg font-medium mb-1 ${emptyCardText}`}>No classes scheduled</h3>
-                        <p className={`${emptyCardText}`}>Enjoy your free day on {day}</p>
+                        <h3 className="text-lg font-medium mb-1" style={{ color: 'var(--empty-card-text)' }}>No classes scheduled</h3>
+                        <p style={{ color: 'var(--empty-card-text)' }}>Enjoy your free day on {day}</p>
                       </div>
                     </CardContent>
                   </Card>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Newspaper, ChevronDown, ChevronUp } from "lucide-react";
 import Navbar from "./components/Navbar";
+import { useThemeClass } from "./useThemeClass";
 
 interface CalendarEvent {
   summary: string;
@@ -89,61 +90,9 @@ function formatDescription(text: string): string {
 }
 
 function AssignmentsPage() {
-  // Get theme from localStorage
-  const theme = typeof window !== 'undefined' ? (localStorage.getItem('theme') || 'white') : 'white';
-  let pageBg = '', glow1 = '', glow2 = '', cardBg = '', cardText = '', cardBorder = '', badgeBg = '', badgeText = '', dateText = '', infoText = '', timeText = '', locationText = '', calendarBg = '', calendarBorder = '', calendarTitle = '', calendarText = '';
-  if (theme === 'dark-blue') {
-    pageBg = 'bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]';
-    glow1 = 'bg-gradient-to-br from-blue-700/40 via-indigo-600/30 to-purple-700/20';
-    glow2 = 'bg-gradient-to-tr from-purple-600/30 via-blue-500/20 to-indigo-700/10';
-    cardBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
-    cardText = 'text-white';
-    cardBorder = 'border-blue-900';
-    badgeBg = 'bg-gradient-to-br from-blue-500 to-indigo-600';
-    badgeText = 'text-white';
-    dateText = 'text-blue-300';
-    infoText = 'text-blue-200';
-    timeText = 'text-pink-400';
-    locationText = 'text-blue-300';
-    calendarBg = 'bg-gradient-to-br from-[#232A4D] to-[#181C3A]';
-    calendarBorder = 'border-blue-900';
-    calendarTitle = 'text-blue-200';
-    calendarText = 'text-blue-300';
-  } else if (theme === 'white') {
-    pageBg = 'bg-white';
-    glow1 = 'bg-white';
-    glow2 = 'bg-white';
-    cardBg = 'bg-white';
-    cardText = 'text-slate-700';
-    cardBorder = 'border-slate-200';
-    badgeBg = 'bg-gradient-to-br from-slate-100 to-white';
-    badgeText = 'text-slate-700';
-    dateText = 'text-slate-400';
-    infoText = 'text-slate-700';
-    timeText = 'text-pink-400';
-    locationText = 'text-slate-400';
-    calendarBg = 'bg-white';
-    calendarBorder = 'border-slate-200';
-    calendarTitle = 'text-slate-700';
-    calendarText = 'text-slate-400';
-  } else {
-    pageBg = 'bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]';
-    glow1 = 'bg-gradient-to-br from-red-700/40 via-pink-700/30 to-red-900/20';
-    glow2 = 'bg-gradient-to-tr from-pink-600/30 via-red-500/20 to-red-900/10';
-    cardBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
-    cardText = 'text-red-200';
-    cardBorder = 'border-red-900';
-    badgeBg = 'bg-gradient-to-br from-red-700 to-pink-700';
-    badgeText = 'text-white';
-    dateText = 'text-red-200';
-    infoText = 'text-red-200';
-    timeText = 'text-pink-400';
-    locationText = 'text-red-200';
-    calendarBg = 'bg-gradient-to-br from-[#3A181C] to-[#4D232A]';
-    calendarBorder = 'border-red-900';
-    calendarTitle = 'text-red-200';
-    calendarText = 'text-red-200';
-  }
+  useThemeClass();
+
+  // Remove theme logic, use CSS variables
   const [calendarUrl] = useState<string>(() => localStorage.getItem("calendarUrl") || "");
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -249,40 +198,60 @@ function AssignmentsPage() {
   };
 
   return (
-  <div className={`min-h-screen w-full ${pageBg} pb-24 pt-8 px-2 md:px-0 relative flex flex-col items-center`}>
+    <div
+      className={
+        "min-h-screen w-full pb-24 pt-8 px-2 md:px-0 relative flex flex-col items-center " +
+        (document.documentElement.classList.contains('theme-dark-blue')
+          ? "bg-gradient-to-br from-[#181C3A] via-[#232A4D] to-[#2B3562]"
+          : document.documentElement.classList.contains('theme-dark-red')
+          ? "bg-gradient-to-br from-[#3A181C] via-[#4D232A] to-[#2B181C]"
+          : "bg-white")
+      }
+    >
       {/* Glowing background effect */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vw] ${glow1} rounded-full blur-3xl opacity-70`} />
-        <div className={`absolute bottom-0 right-0 w-[40vw] h-[30vw] ${glow2} rounded-full blur-2xl opacity-60`} />
+        <div className={
+          "absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[40vw] rounded-full blur-3xl opacity-70 " +
+          (document.documentElement.classList.contains('theme-dark-blue')
+            ? "bg-gradient-to-br from-blue-700/40 via-indigo-600/30 to-purple-700/20"
+            : document.documentElement.classList.contains('theme-dark-red')
+            ? "bg-gradient-to-br from-red-700/40 via-pink-700/30 to-red-900/20"
+            : "bg-white")
+        } />
+        <div className={
+          "absolute bottom-0 right-0 w-[40vw] h-[30vw] rounded-full blur-2xl opacity-60 " +
+          (document.documentElement.classList.contains('theme-dark-blue')
+            ? "bg-gradient-to-tr from-purple-600/30 via-blue-500/20 to-indigo-700/10"
+            : document.documentElement.classList.contains('theme-dark-red')
+            ? "bg-gradient-to-tr from-pink-600/30 via-red-500/20 to-red-900/10"
+            : "bg-white")
+        } />
       </div>
       <div className="relative z-10 w-full max-w-md mx-auto px-4 py-6">
         <div className="flex flex-col items-center gap-4 mb-6">
-          <div className={`${badgeBg} rounded-full p-3 shadow-lg`}>
-            <Newspaper className={`h-8 w-8 ${badgeText}`} />
+          <div className="rounded-full p-3 shadow-lg"
+            style={{ background: 'var(--badge-lecture)' }}>
+            <Newspaper className="h-8 w-8" style={{ color: 'var(--icon-text)' }} />
           </div>
-          <h2 className={`text-2xl font-bold tracking-tight ${cardText}`}>Assignments & Deadlines</h2>
-          {loading && <div className={`${infoText}`}>Loading assignments...</div>}
+          <h2 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--card-text)' }}>Assignments & Deadlines</h2>
+          {loading && <div style={{ color: 'var(--info-text)' }}>Loading assignments...</div>}
           {error && <div className="text-red-400">{error}</div>}
         </div>
         {events.length > 0 && (
           <div className="mb-8">
             <div className="flex justify-between items-center mb-2">
-              <h3 className={`text-lg font-semibold ${calendarTitle}`}>Upcoming Assignments</h3>
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--calendar-title)' }}>Upcoming Assignments</h3>
               {/* Reset hidden assignments button */}
               {hiddenAssignments.size > 0 && (
                 <button
-                  className={`text-xs underline px-2 py-1 rounded transition font-semibold
-                    ${
-                      theme === 'dark-blue'
-                        ? 'bg-blue-900/40 text-blue-200 hover:bg-blue-900/60 border border-blue-800'
-                        : theme === 'white'
-                        ? 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
-                        : 'bg-red-900/40 text-red-200 hover:bg-red-900/60 border border-red-800'
-                    }
-                  `}
+                  className="text-xs underline px-2 py-1 rounded transition font-semibold"
+                  style={{
+                    background: 'var(--tabs-bg)',
+                    color: 'var(--tabs-text)',
+                    border: '1px solid var(--card-border)'
+                  }}
                   onClick={resetHiddenAssignments}
                   type="button"
-                  style={{}}
                 >
                   Reset Hidden
                 </button>
@@ -326,19 +295,25 @@ function AssignmentsPage() {
                   return (
                     <div
                       key={getAssignmentKey(ev, index)}
-                      className={`${cardBg} rounded-2xl shadow-2xl p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 border ${cardBorder} ${cardText} ${isExpanded ? (theme === 'dark-blue' ? 'ring-2 ring-blue-400' : theme === 'white' ? 'ring-2 ring-slate-400' : 'ring-2 ring-red-400') : ''}`}
+                      className="rounded-2xl shadow-2xl p-4 flex flex-col gap-2 cursor-pointer transition-all duration-200 border"
+                      style={{
+                        background: 'var(--card-bg)',
+                        color: 'var(--card-text)',
+                        borderColor: 'var(--card-border)',
+                        boxShadow: isExpanded ? '0 0 0 2px var(--card-border)' : undefined
+                      }}
                       onClick={() => toggleCard(index)}
                     >
                       <div className="flex justify-between items-center">
-                        <span className={`font-bold text-lg ${calendarTitle}`}>{course}</span>
-                        <span className={`text-xs ${dateText}`}>{formatDate(ev.start)}</span>
+                        <span className="font-bold text-lg" style={{ color: 'var(--calendar-title)' }}>{course}</span>
+                        <span className="text-xs" style={{ color: 'var(--empty-card-text)' }}>{formatDate(ev.start)}</span>
                       </div>
-                      <div className={`text-base font-semibold ${cardText}`}>{assignment}</div>
-                      <div className={`text-sm overflow-hidden ${infoText} ${isExpanded ? '' : 'line-clamp-2'}`}>{info}</div>
+                      <div className="text-base font-semibold" style={{ color: 'var(--card-text)' }}>{assignment}</div>
+                      <div className={`text-sm overflow-hidden`} style={{ color: 'var(--info-text)', ...(isExpanded ? {} : { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }) }}>{info}</div>
                       <div className="flex justify-between items-center text-xs mt-2">
-                        <span className={`font-bold ${timeText} text-bg`}>⏳ Time left: {timeRemaining(ev.start)}</span>
+                        <span className="font-bold" style={{ color: 'var(--practice-text)' }}>⏳ Time left: {timeRemaining(ev.start)}</span>
                         <div className="flex items-center gap-2">
-                          {ev.location && <span className={`${locationText}`}>{ev.location}</span>}
+                          {ev.location && <span style={{ color: 'var(--empty-card-text)' }}>{ev.location}</span>}
                           {/* Hide button */}
                           <button
                             className="text-xs underline px-1 py-0.5 rounded hover:bg-opacity-30 transition"
@@ -350,9 +325,9 @@ function AssignmentsPage() {
                             Hide
                           </button>
                           {isExpanded ? (
-                            <ChevronUp className={`h-4 w-4 ${locationText}`} />
+                            <ChevronUp className="h-4 w-4" style={{ color: 'var(--empty-card-text)' }} />
                           ) : (
-                            <ChevronDown className={`h-4 w-4 ${locationText}`} />
+                            <ChevronDown className="h-4 w-4" style={{ color: 'var(--empty-card-text)' }} />
                           )}
                         </div>
                       </div>
@@ -363,9 +338,13 @@ function AssignmentsPage() {
           </div>
         )}
         {events.length > 0 && (
-          <div className={`${calendarBg} rounded-2xl shadow-2xl p-4 mt-4 border ${calendarBorder}`}>
-            <h3 className={`text-lg font-semibold mb-2 ${calendarTitle}`}>Calendar (coming soon)</h3>
-            <div className={`text-sm ${calendarText}`}>A visual calendar will be shown here in future updates.</div>
+          <div className="rounded-2xl shadow-2xl p-4 mt-4 border"
+            style={{
+              background: 'var(--card-bg)',
+              borderColor: 'var(--card-border)'
+            }}>
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--calendar-title)' }}>Calendar (coming soon)</h3>
+            <div className="text-sm" style={{ color: 'var(--calendar-text)' }}>A visual calendar will be shown here in future updates.</div>
           </div>
         )}
       </div>

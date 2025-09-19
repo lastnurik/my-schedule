@@ -16,7 +16,17 @@ function App({ search }) {
         <ThemeProvider theme={theme}>
           <ColorModeProvider>
             <CSSReset />
-            <Home isIOS={isIOS} />
+            <div
+              className="aitumap-root w-full h-full"
+              style={{
+                background: "var(--card-bg)",
+                color: "var(--card-text)",
+                borderColor: "var(--card-border)",
+                // Add more variables as needed for your map UI
+              }}
+            >
+              <Home isIOS={isIOS} />
+            </div>
           </ColorModeProvider>
         </ThemeProvider>
       </ChakraProvider>
