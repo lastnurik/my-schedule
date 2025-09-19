@@ -113,10 +113,44 @@ function App() {
   const [hiddenSubjects, setHiddenSubjects] = useState<string[]>([]);
   const navigate = useNavigate();
 
+  // Add state for group input fields
+  const [groupPrefix, setGroupPrefix] = useState<string>('');
+  const [groupNumber, setGroupNumber] = useState<string>('');
+  const [groupSuffix, setGroupSuffix] = useState<string>('');
+
+  // Helper to format prefix (IoT special case)
+  const formatPrefix = (input: string) => {
+    if (/^iot$/i.test(input)) return 'IoT';
+    return input.toUpperCase();
+  };
+
+  // Update group state when any part changes
+  useEffect(() => {
+    if (groupPrefix && groupNumber) {
+      setGroup(
+        groupPrefix + '-' + groupNumber + (groupSuffix ? groupSuffix : '')
+      );
+    } else {
+      setGroup('');
+    }
+  }, [groupPrefix, groupNumber, groupSuffix]);
+
+  // When loading from localStorage, parse group into fields
   useEffect(() => {
     // ...existing code...
     const lastGroup = localStorage.getItem('lastGroup');
     if (lastGroup) {
+      // Parse group into prefix, number, suffix
+      const match = lastGroup.match(/^([A-Za-z]+)-(\d+)(M?)$/i);
+      if (match) {
+        setGroupPrefix(formatPrefix(match[1]));
+        setGroupNumber(match[2]);
+        setGroupSuffix(match[3].toUpperCase());
+      } else {
+        setGroupPrefix('');
+        setGroupNumber('');
+        setGroupSuffix('');
+      }
       setGroup(lastGroup);
       fetchLocalSchedule(lastGroup);
       const hidden = localStorage.getItem(`hiddenSubjects_${lastGroup}`);
@@ -377,19 +411,55 @@ function App() {
               className={`flex flex-col gap-4 ${modalBg} rounded-3xl border ${modalBorder} shadow-2xl px-6 py-8 w-[90vw] max-w-md mx-auto`}
             >
               <label className="flex flex-col gap-1">
-                <Input
-                  type="text"
-                  placeholder="Enter group name..."
-                  value={group}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGroup(e.target.value)}
-                  required
-                  className={`text-base md:text-lg px-4 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
-                />
-                <span className={`text-xs ${emptyCardText} pl-1`}>e.g. <span className={`font-mono ${cardText}`}>SE-2417</span></span>
+                <div className="flex gap-2 items-center">
+                  {/* Prefix input */}
+                  <Input
+                    type="text"
+                    placeholder="Prefix"
+                    value={groupPrefix}
+                    onChange={e => {
+                      let val = e.target.value.replace(/[^a-zA-Z]/g, '');
+                      val = formatPrefix(val);
+                      setGroupPrefix(val);
+                    }}
+                    maxLength={5}
+                    required
+                    className={`w-20 text-base md:text-lg px-4 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                  />
+                  <span className={`font-bold text-lg ${cardText}`}>-</span>
+                  {/* Number input */}
+                  <Input
+                    type="text"
+                    placeholder="Number"
+                    value={groupNumber}
+                    onChange={e => {
+                      let val = e.target.value.replace(/[^0-9]/g, '');
+                      setGroupNumber(val);
+                    }}
+                    maxLength={4}
+                    required
+                    className={`w-20 text-base md:text-lg px-4 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                  />
+                  {/* Suffix input (optional, only 'M' allowed) */}
+                  <Input
+                    type="text"
+                    placeholder="M"
+                    value={groupSuffix}
+                    onChange={e => {
+                      let val = e.target.value.replace(/[^mM]/g, '').toUpperCase();
+                      setGroupSuffix(val);
+                    }}
+                    maxLength={1}
+                    className={`w-10 text-base md:text-lg px-2 py-3 rounded-lg border ${cardBorder} focus:border-indigo-500 focus:ring-2 focus:ring-indigo-400 ${inputBg} ${inputText} ${inputPlaceholder}`}
+                  />
+                </div>
+                <span className={`text-xs ${emptyCardText} pl-1`}>
+                  e.g. <span className={`font-mono ${cardText}`}>SE-2417</span> or <span className={`font-mono ${cardText}`}>CSE-2406M</span> or <span className={`font-mono ${cardText}`}>IoT-2401</span>
+                </span>
               </label>
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !groupPrefix || !groupNumber}
                 className={`${badgeLecture} font-semibold shadow-md rounded-xl px-6 py-2 w-full`}
               >
                 {loading ? 'Fetching...' : 'Fetch Schedule'}
