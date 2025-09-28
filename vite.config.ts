@@ -31,6 +31,10 @@ export default defineConfig({
             purpose: "maskable"
           }
         ]
+      },
+      workbox: {
+        // Increase limit to 5 MiB (default is 2 MiB)
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       }
     })
   ],
