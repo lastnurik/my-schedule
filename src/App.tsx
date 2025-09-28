@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import ScheduleService from "@/api/schedule";
 import Navbar from './components/Navbar';
 import { useNavigate } from 'react-router-dom';
@@ -401,13 +402,25 @@ function App() {
   useThemeClass();
 
   const [scheduleData, setScheduleData] = useState<ScheduleData>({});
-  const [selectedDay, setSelectedDay] = useState<string>('Monday');
+  // --- set selectedDay to current day of week on mount ---
+  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const getToday = () => {
+    const jsDay = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    // Map JS day to our daysOfWeek (Monday=1, ..., Saturday=6)
+    if (jsDay === 0) return 'Monday'; // fallback to Monday for Sunday
+    return daysOfWeek[jsDay - 1] || 'Monday';
+  };
+  const [selectedDay, setSelectedDay] = useState<string>(getToday());
   const [group, setGroup] = useState<string>('');
   const [showForm, setShowForm] = useState<boolean>(false);
   const [showFilter, setShowFilter] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [hiddenSubjects, setHiddenSubjects] = useState<string[]>([]);
+  const [hideOnlineLessons, setHideOnlineLessons] = useState<boolean>(() => {
+    const saved = localStorage.getItem("hideOnlineLessons");
+    return saved === "true";
+  });
   const navigate = useNavigate();
   const [groupPrefix, setGroupPrefix] = useState<string>('');
   const [groupNumber, setGroupNumber] = useState<string>('');
@@ -445,6 +458,10 @@ function App() {
       setHiddenSubjects(hidden ? JSON.parse(hidden) : []);
     }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("hideOnlineLessons", hideOnlineLessons ? "true" : "false");
+  }, [hideOnlineLessons]);
 
   const fetchLocalSchedule = (groupName: string) => {
     const service = new ScheduleService();
@@ -519,8 +536,6 @@ function App() {
     }
   };
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
   return (
     <div className={
       "min-h-screen w-full pb-24 pt-8 px-2 md:px-0 relative " +
@@ -549,6 +564,23 @@ function App() {
           showFilter={showFilter}
           setShowFilter={setShowFilter}
         />
+        {/* --- Hide Online Lessons Switch --- */}
+        <div className="flex items-center justify-end mb-4">
+          <label className="flex items-center gap-2 cursor-pointer select-none text-sm font-medium" style={{ color: 'var(--card-text)' }}>
+            <Switch
+              checked={hideOnlineLessons}
+              onCheckedChange={setHideOnlineLessons}
+              className={
+                document.documentElement.classList.contains('theme-dark-blue')
+                  ? "data-[state=checked]:bg-blue-700 data-[state=unchecked]:bg-blue-900/30"
+                  : document.documentElement.classList.contains('theme-dark-red')
+                  ? "data-[state=checked]:bg-pink-700 data-[state=unchecked]:bg-red-900/30"
+                  : "data-[state=checked]:bg-slate-700 data-[state=unchecked]:bg-slate-200"
+              }
+            />
+            Hide online lessons
+          </label>
+        </div>
         <GroupModal
           showForm={showForm}
           setShowForm={setShowForm}
@@ -583,7 +615,10 @@ function App() {
               const key = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
                 ? `${item.discipline}__${item.lector}`
                 : item.discipline;
-              return !hiddenSubjects.includes(key);
+              // Filter hidden subjects and online lessons if enabled
+              if (hiddenSubjects.includes(key)) return false;
+              if (hideOnlineLessons && item.classroom.trim().toLowerCase() === "online") return false;
+              return true;
             });
             return (
               <TabsContent key={day} value={day} className="mt-6">
