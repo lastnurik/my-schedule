@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,8 @@ import ScheduleService from "@/api/schedule";
 import Navbar from './components/Navbar';
 import { useNavigate } from 'react-router-dom';
 import { useThemeClass } from './useThemeClass';
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 
 type ScheduleItem = {
@@ -46,7 +48,7 @@ const GlowingBackground = () => (
   </div>
 );
 
-const HeaderCard = ({ group, visibleDisciplines, showForm, setShowForm, showFilter, setShowFilter }: any) => (
+const HeaderCard = ({ group, visibleDisciplines, showForm, setShowForm, showFilter, setShowFilter, exporting, handleExportPdf }: any) => (
   <Card className="mb-6 border-2 shadow-2xl rounded-3xl px-6 py-7"
     style={{ background: 'var(--card-bg)', color: 'var(--card-text)', borderColor: 'var(--card-border)' }}>
     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -88,6 +90,22 @@ const HeaderCard = ({ group, visibleDisciplines, showForm, setShowForm, showFilt
             onClick={() => setShowFilter((v: boolean) => !v)}
           >
             {showFilter ? 'Hide' : 'Show'}
+          </Button>
+        </div>
+        {/* --- Export PDF Button --- */}
+        <div className="flex justify-end mt-4">
+          <Button
+            variant="outline"
+            className="rounded-full px-5 py-2 font-semibold shadow border-2"
+            style={{
+              background: 'var(--badge-lecture)',
+              color: 'var(--card-text)',
+              borderColor: 'var(--card-border)'
+            }}
+            onClick={handleExportPdf}
+            disabled={exporting}
+          >
+            {exporting ? "Exporting..." : "Export as PDF"}
           </Button>
         </div>
       </div>
@@ -482,29 +500,36 @@ function App() {
     'German language', 'Chinese language', 'Немецкий язык', 'Китайский язык',
   ];
 
-  const allSubjects = Array.from(
-    new Set(
-      Object.values(scheduleData).flat().map(item =>
-        languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
-          ? `${item.discipline}__${item.lector}`
-          : item.discipline
+  const allSubjects = useMemo(() =>
+    Array.from(
+      new Set(
+        Object.values(scheduleData).flat().map(item =>
+          languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+            ? `${item.discipline}__${item.lector}`
+            : item.discipline
+        )
       )
     )
-  );
+  , [scheduleData, languageSubjects]);
 
-  const visibleDisciplines = Array.from(
-    new Set(
-      Object.values(scheduleData)
-        .flat()
-        .filter(item => {
-          const subjectKey = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
-            ? `${item.discipline}__${item.lector}`
-            : item.discipline;
-          return !hiddenSubjects.includes(subjectKey);
-        })
-        .map(item => item.discipline)
+  // --- visibleDisciplines is now reactive to filters ---
+  const visibleDisciplines = useMemo(() =>
+    Array.from(
+      new Set(
+        Object.values(scheduleData)
+          .flat()
+          .filter(item => {
+            const subjectKey = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+              ? `${item.discipline}__${item.lector}`
+              : item.discipline;
+            if (hiddenSubjects.includes(subjectKey)) return false;
+            if (hideOnlineLessons && item.classroom.trim().toLowerCase() === "online") return false;
+            return true;
+          })
+          .map(item => item.discipline)
+      )
     )
-  );
+  , [scheduleData, hiddenSubjects, hideOnlineLessons, languageSubjects]);
 
   const handleFilterChange = (subjectKey: string) => {
     let updated: string[];
@@ -536,6 +561,44 @@ function App() {
     }
   };
 
+  // --- Export as PDF ---
+  const [exporting, setExporting] = useState(false);
+
+  // --- Prepare filtered schedule for export ---
+  const filteredScheduleForExport = daysOfWeek.map(day => {
+    const items = (scheduleData[day] || []).filter(item => {
+      const key = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
+        ? `${item.discipline}__${item.lector}`
+        : item.discipline;
+      if (hiddenSubjects.includes(key)) return false;
+      if (hideOnlineLessons && item.classroom.trim().toLowerCase() === "online") return false;
+      return true;
+    });
+    return { day, items };
+  });
+
+  const handleExportPdf = async () => {
+    setExporting(true);
+    setTimeout(async () => {
+      const exportEl = document.getElementById("schedule-export-table");
+      if (exportEl) {
+        const canvas = await html2canvas(exportEl, {
+          backgroundColor: null,
+          scale: 2,
+        });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF({
+          orientation: "portrait",
+          unit: "px",
+          format: [canvas.width, canvas.height + 40]
+        });
+        pdf.addImage(imgData, "PNG", 0, 20, canvas.width, canvas.height);
+        pdf.save(`${group || "schedule"}-export.pdf`);
+      }
+      setExporting(false);
+    }, 100);
+  };
+
   return (
     <div className={
       "min-h-screen w-full pb-24 pt-8 px-2 md:px-0 relative " +
@@ -547,6 +610,189 @@ function App() {
     }>
       <GlowingBackground />
       <div className="relative z-10 max-w-md mx-auto">
+        {/* --- Hidden Export Table --- */}
+        <div
+          id="schedule-export-table"
+          style={{
+            position: "absolute",
+            left: "-9999px",
+            top: 0,
+            width: "700px",
+            padding: "32px",
+            background: document.documentElement.classList.contains('theme-dark-blue')
+              ? "#232A4D"
+              : document.documentElement.classList.contains('theme-dark-red')
+              ? "#4D232A"
+              : "#fff",
+            color: 'var(--card-text)',
+            borderRadius: "32px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+            fontFamily: "Inter, sans-serif",
+          }}
+        >
+          <div style={{ fontSize: "2rem", fontWeight: 700, marginBottom: "24px", textAlign: "center" }}>
+            {group ? `${group} Custom Schedule` : "Custom Schedule"}
+          </div>
+          <table style={{
+            width: "100%",
+            borderCollapse: "separate",
+            borderSpacing: "0 12px",
+            fontSize: "1rem",
+          }}>
+            <tbody>
+              {filteredScheduleForExport.map(({ day, items }) => (
+                <tr key={day}>
+                  <td style={{
+                    verticalAlign: "top",
+                    padding: "0 0 0 0",
+                    width: "110px",
+                  }}>
+                    <div style={{
+                      background: "linear-gradient(90deg,#6366f1 60%,#818cf8 100%)",
+                      color: "#fff",
+                      borderRadius: "16px",
+                      fontWeight: 600,
+                      fontSize: "1.1rem",
+                      padding: "10px 18px",
+                      marginBottom: items.length ? "0" : "12px",
+                      textAlign: "center",
+                      boxShadow: "0 2px 8px rgba(99,102,241,0.08)",
+                    }}>
+                      {day}
+                    </div>
+                  </td>
+                  <td style={{ width: "100%" }}>
+                    {items.length > 0 ? (
+                      <table style={{
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        fontSize: "1rem",
+                      }}>
+                        <thead>
+                          <tr>
+                            <th style={{
+                              background: "#f3f4f6",
+                              color: "#374151",
+                              fontWeight: 600,
+                              borderRadius: "8px 0 0 8px",
+                              padding: "8px 12px",
+                              border: "none",
+                            }}>Time</th>
+                            <th style={{
+                              background: "#f3f4f6",
+                              color: "#374151",
+                              fontWeight: 600,
+                              padding: "8px 12px",
+                              border: "none",
+                            }}>Subject</th>
+                            <th style={{
+                              background: "#f3f4f6",
+                              color: "#374151",
+                              fontWeight: 600,
+                              padding: "8px 12px",
+                              border: "none",
+                            }}>Type</th>
+                            <th style={{
+                              background: "#f3f4f6",
+                              color: "#374151",
+                              fontWeight: 600,
+                              padding: "8px 12px",
+                              border: "none",
+                            }}>Location</th>
+                            <th style={{
+                              background: "#f3f4f6",
+                              color: "#374151",
+                              fontWeight: 600,
+                              borderRadius: "0 8px 8px 0",
+                              padding: "8px 12px",
+                              border: "none",
+                            }}>Instructor</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {items.map((item, idx) => (
+                            <tr key={idx} style={{
+                              background: "#fff",
+                              boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                              borderRadius: "8px",
+                            }}>
+                              <td style={{
+                                padding: "10px 12px",
+                                fontWeight: 500,
+                                color: "#6366f1",
+                                background: "#f5f3ff",
+                                borderRadius: "8px 0 0 8px",
+                                border: "none",
+                                whiteSpace: "nowrap",
+                              }}>{item.time}</td>
+                              <td style={{
+                                padding: "10px 12px",
+                                fontWeight: 500,
+                                color: "#232A4D",
+                                border: "none",
+                                maxWidth: "160px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}>{item.discipline}</td>
+                              <td style={{
+                                padding: "10px 12px",
+                                fontWeight: 500,
+                                color: item.type === "lecture" ? "#2563eb" : "#db2777",
+                                background: item.type === "lecture" ? "#eff6ff" : "#fdf2f8",
+                                border: "none",
+                                whiteSpace: "nowrap",
+                              }}>{item.type.charAt(0).toUpperCase() + item.type.slice(1)}</td>
+                              <td style={{
+                                padding: "10px 12px",
+                                fontWeight: 500,
+                                color: "#374151",
+                                border: "none",
+                                whiteSpace: "nowrap",
+                              }}>{item.classroom}</td>
+                              <td style={{
+                                padding: "10px 12px",
+                                fontWeight: 500,
+                                color: "#6b7280",
+                                borderRadius: "0 8px 8px 0",
+                                border: "none",
+                                maxWidth: "120px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}>{item.lector}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <div style={{
+                        background: "#f3f4f6",
+                        color: "#9ca3af",
+                        borderRadius: "12px",
+                        padding: "14px 18px",
+                        fontWeight: 500,
+                        fontSize: "1rem",
+                        marginBottom: "12px",
+                        textAlign: "center",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
+                      }}>
+                        No classes scheduled
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{
+            marginTop: "32px",
+            textAlign: "center",
+            fontSize: "0.95rem",
+            color: "#a1a1aa",
+            fontWeight: 400,
+          }}>
+            Exported from Schedule Maker
+          </div>
+        </div>
         <HeaderCard
           group={group}
           visibleDisciplines={visibleDisciplines}
@@ -554,6 +800,8 @@ function App() {
           setShowForm={setShowForm}
           showFilter={showFilter}
           setShowFilter={setShowFilter}
+          exporting={exporting}
+          handleExportPdf={handleExportPdf}
         />
         <SubjectFilterModal
           allSubjects={allSubjects}
@@ -595,7 +843,7 @@ function App() {
           loading={loading}
           error={error}
         />
-        <Tabs defaultValue="Monday" value={selectedDay} onValueChange={setSelectedDay} className="w-full mt-2">
+        <Tabs value={selectedDay} onValueChange={setSelectedDay} className="w-full mt-2">
           <div className="overflow-x-auto pb-2 mb-6">
             <TabsList className="grid w-full grid-cols-6 h-auto p-1 rounded-2xl border shadow-lg" style={{ background: 'var(--tabs-bg)', borderColor: 'var(--card-border)' }}>
               {daysOfWeek.map(day => (
@@ -615,7 +863,6 @@ function App() {
               const key = languageSubjects.some(lang => item.discipline.toLowerCase().includes(lang.toLowerCase()))
                 ? `${item.discipline}__${item.lector}`
                 : item.discipline;
-              // Filter hidden subjects and online lessons if enabled
               if (hiddenSubjects.includes(key)) return false;
               if (hideOnlineLessons && item.classroom.trim().toLowerCase() === "online") return false;
               return true;
@@ -625,7 +872,7 @@ function App() {
                 <div className="grid gap-6">
                   {filtered.length > 0 ? (
                     filtered.map(item => (
-                      <ScheduleCard key={item.time + item.discipline + item.classroom} item={item} languageSubjects={languageSubjects} navigate={navigate} />
+                      <ScheduleCard key={item.time + item.discipline + item.classroom} item={item} navigate={navigate} />
                     ))
                   ) : (
                     <EmptyDayCard day={day} />
